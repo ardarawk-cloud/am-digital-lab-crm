@@ -1,11 +1,16 @@
 {
   "name": "am-digital-lab-crm",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
-  "description": "AM DIGITAL LAB CRM & Internal Dashboard",
+  "type": "module",
+  "description": "AM DIGITAL LAB CRM on Cloudflare Workers + D1",
   "scripts": {
-    "start": "node server.js",
-    "check": "node --check server.js && for f in lib/*.js public/*.js; do node --check \"$f\"; done"
+    "build": "cat worker-parts/*.part > worker.js",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "check": "npm run build && node --check worker.js && for f in public/*.js; do if [ -f \"$f\" ]; then node --check \"$f\"; fi; done"
   },
-  "engines": {"node": ">=22"}
+  "devDependencies": {
+    "wrangler": "4.115.0"
+  }
 }
