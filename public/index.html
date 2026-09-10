@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AM DIGITAL LAB — CRM</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="login" class="login-shell">
+    <div class="login-card">
+      <div class="brand-mark">AM</div>
+      <h1>AM DIGITAL LAB</h1>
+      <p>CRM & Internal Dashboard</p>
+      <form id="loginForm">
+        <label>Email<input id="loginEmail" type="email" value="admin@amdigital.local" required></label>
+        <label>Password<input id="loginPassword" type="password" value="change-me-123" required></label>
+        <button class="primary" type="submit">Masuk ke Dashboard</button>
+        <div id="loginError" class="error"></div>
+      </form>
+      <small>Default password hanya untuk build awal. Ganti melalui environment variable sebelum production.</small>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark small">AM</span><div><b>AM DIGITAL LAB</b><span>Internal CRM</span></div></div>
+      <nav id="nav">
+        <button data-page="dashboard" class="active">Dashboard</button>
+        <button data-page="leads">Sales / Leads</button>
+        <button data-page="clients">Clients</button>
+        <button data-page="projects">Projects</button>
+        <button data-page="finance">Finance</button>
+      </nav>
+      <div class="side-bottom"><span id="userName"></span><button id="logoutBtn">Logout</button></div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><h2 id="pageTitle">Dashboard</h2><p id="pageSub">Kontrol operasional AM DIGITAL LAB.</p></div>
+        <button id="quickAdd" class="primary">+ New Lead</button>
+      </header>
+      <section id="content"></section>
+    </main>
+  </div>
+
+  <dialog id="modal"><form method="dialog" id="modalForm"><div class="modal-head"><div><h3 id="modalTitle"></h3><p id="modalSub"></p></div><button value="cancel" class="icon-btn">×</button></div><div id="modalBody" class="form-grid"></div><div class="modal-actions"><button value="cancel" class="ghost">Batal</button><button id="modalSave" value="default" class="primary">Simpan</button></div></form></dialog>
+  <script src="/app.js"></script>
+</body>
+</html>
