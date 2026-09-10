@@ -1,0 +1,12 @@
+/* Mobile containment hotfix: keep wide data tables from expanding dashboard grid tracks. */
+html,body{max-width:100%;overflow-x:hidden}
+main,#content,.section-grid,.section-grid>*,.split,.split>*,.card,.table-wrap{min-width:0;max-width:100%}
+.table-wrap{width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+
+@media(max-width:760px){
+  .section-grid{width:100%;min-width:0}
+  .section-grid>div{width:100%;min-width:0;max-width:100%}
+  .section-grid .card,.section-grid .table-wrap{width:100%;max-width:100%}
+  .section-grid .list-item,.section-grid .list-item>div{min-width:0}
+  .section-grid .list-item b,.section-grid .list-item small{overflow-wrap:anywhere}
+}
