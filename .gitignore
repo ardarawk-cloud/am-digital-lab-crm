@@ -1,7 +1,9 @@
-data/
+node_modules/
+.wrangler/
+.dev.vars
+.env
+.DS_Store
+worker.js
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
-.env
-.DS_Store
-node_modules/
