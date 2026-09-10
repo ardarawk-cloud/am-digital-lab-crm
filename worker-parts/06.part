@@ -13,8 +13,14 @@ export default {
   async fetch(request,env){
     try{
       const url=new URL(request.url);
-      if(url.pathname==='/healthz')return reply({ok:true,service:'am-digital-lab-crm',version:VERSION,d1:!!env.DB});
-      if(url.pathname.startsWith('/api/')){await ensureSchema(env.DB);return await api(request,env,url);}
+      const DB=durableDB(env.CRM_DB);
+      const runtimeEnv={...env,DB};
+      if(url.pathname==='/healthz'){
+        await ensureSchema(DB);
+        const database=await DB.health();
+        return reply({ok:database,service:'am-digital-lab-crm',version:VERSION,storage:'sqlite-durable-object',database});
+      }
+      if(url.pathname.startsWith('/api/')){await ensureSchema(DB);return await api(request,runtimeEnv,url);}
       return env.ASSETS.fetch(request);
     }catch(err){console.error(err);return reply({error:'Internal server error',code:'AMDL_WORKER_ERROR'},500);}
   }
