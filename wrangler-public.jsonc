@@ -9,7 +9,10 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*", "/healthz"]
   },
-  "vars": {
-    "CRM_LEAD_ENDPOINT": "https://am-digital-lab-crm.ardarawk.workers.dev/api/public/leads"
-  }
+  "services": [
+    {
+      "binding": "CRM_SERVICE",
+      "service": "am-digital-lab-crm"
+    }
+  ]
 }
