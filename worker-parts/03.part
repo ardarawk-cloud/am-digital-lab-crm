@@ -1,0 +1,34 @@
+    DB.prepare("SELECT COUNT(*) c FROM leads WHERE status='WON' AND substr(created_at,1,7)=?").bind(month),
+    DB.prepare("SELECT COUNT(*) c FROM tasks WHERE status!='DONE'"),
+    DB.prepare("SELECT COUNT(*) c FROM qc_items WHERE severity='CRITICAL' AND status NOT IN ('PASS','LOCKED')"),
+    DB.prepare("SELECT COUNT(*) c FROM change_requests WHERE status NOT IN ('REJECTED','COMPLETED')"),
+    DB.prepare("SELECT status,COUNT(*) count,COALESCE(SUM(potential_value),0) value FROM leads GROUP BY status"),
+    DB.prepare(`SELECT p.*,c.name client_name,(SELECT COUNT(*) FROM tasks t WHERE t.project_id=p.id AND t.status!='DONE') open_tasks,(SELECT COUNT(*) FROM project_scope s WHERE s.project_id=p.id) scope_items,(SELECT COUNT(*) FROM qc_items q WHERE q.project_id=p.id AND q.severity='CRITICAL' AND q.status NOT IN ('PASS','LOCKED')) critical_qc FROM projects p JOIN clients c ON c.id=p.client_id WHERE p.status!='CLOSED' ORDER BY p.id DESC LIMIT 8`),
+    DB.prepare(`SELECT i.*,c.name client_name,p.name project_name FROM invoices i JOIN clients c ON c.id=i.client_id LEFT JOIN projects p ON p.id=i.project_id WHERE i.status NOT IN ('PAID','CANCELLED') ORDER BY COALESCE(NULLIF(i.due_date,''),'9999-12-31') LIMIT 8`)
+  ]);
+  const one=(i,key)=>Number(batch[i].results?.[0]?.[key]||0),newLeads=one(0,'c'),won=one(4,'c');
+  return {kpis:{newLeads,activeProjects:one(1,'c'),revenue:one(2,'v'),outstanding:one(3,'v'),conversion:newLeads?Math.round(won/newLeads*100):0,openTasks:one(5,'c'),criticalQc:one(6,'c'),pendingCr:one(7,'c'),mrr:0},pipeline:batch[8].results||[],projects:batch[9].results||[],due:batch[10].results||[]};
+}
+
+async function api(request,env,url){
+  const DB=env.DB, method=request.method, path=url.pathname;
+  if(method==='POST'&&path==='/api/login')return login(request,env);
+  if(method==='POST'&&path==='/api/logout'){
+    const t=cookies(request).amdl_session;if(t)await DB.prepare('DELETE FROM sessions WHERE token=?').bind(t).run();
+    return reply({ok:true},200,{'Set-Cookie':'amdl_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'});
+  }
+  const user=await currentUser(request,DB);if(!user)return reply({error:'Unauthorized'},401);
+  if(method==='GET'&&path==='/api/me')return reply({user,version:VERSION});
+  if(method==='GET'&&path==='/api/dashboard')return reply(await dashboard(DB));
+
+  if(method==='GET'&&path==='/api/leads')return reply({items:await rows(DB.prepare('SELECT * FROM leads ORDER BY id DESC'))});
+  if(method==='POST'&&path==='/api/leads'){
+    const d=await readBody(request);if(!d.name)return reply({error:'Nama lead wajib diisi.'},400);const code=await nextCode(DB,'leads','AMD-L');
+    const r=await DB.prepare(`INSERT INTO leads (code,name,company,phone,email,source,project_type,project_description,budget_range,target_launch,status,potential_value,assigned_to,last_contact,next_followup,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(code,d.name,d.company||'',d.phone||'',d.email||'',d.source||'Website',d.project_type||'Website',d.project_description||'',d.budget_range||'',d.target_launch||'',d.status||'NEW',Number(d.potential_value||0),d.assigned_to||'',d.last_contact||'',d.next_followup||'',d.notes||'').run();const id=Number(r.meta?.last_row_id||0);await log(DB,user,`Created lead ${code}`,'lead',id);return reply({ok:true,id,code},201);
+  }
+  let m=match(path,'/api/leads/:id');
+  if(method==='PATCH'&&m){const d=await readBody(request);await updateFields(DB,'leads',m.id,d,['name','company','phone','email','source','project_type','project_description','budget_range','target_launch','status','potential_value','assigned_to','last_contact','next_followup','notes'],['potential_value']);await log(DB,user,`Updated lead #${m.id}`,'lead',Number(m.id));return reply({ok:true});}
+  m=match(path,'/api/leads/:id/convert');
+  if(method==='POST'&&m){const lead=await DB.prepare('SELECT * FROM leads WHERE id=?').bind(Number(m.id)).first();if(!lead)return reply({error:'Lead tidak ditemukan.'},404);if(lead.status!=='WON')return reply({error:'Lead harus berstatus WON sebelum dikonversi.'},409);if(await DB.prepare('SELECT id FROM clients WHERE source_lead_id=?').bind(lead.id).first())return reply({error:'Lead ini sudah pernah dikonversi.'},409);const cc=await nextCode(DB,'clients','AMD-C'),pc=await nextCode(DB,'projects','AMD');await DB.batch([DB.prepare('INSERT INTO clients (code,name,company,phone,email,source_lead_id,notes) VALUES (?,?,?,?,?,?,?)').bind(cc,lead.name,lead.company,lead.phone,lead.email,lead.id,lead.notes),DB.prepare(`INSERT INTO projects (code,client_id,name,project_type,value,status,health,progress,deadline,pm,scope_summary,scope_approved) SELECT ?,id,?,?,?,?,?,?,?,?,?,0 FROM clients WHERE code=?`).bind(pc,`${lead.company||lead.name} — ${lead.project_type}`,lead.project_type,Number(lead.potential_value||0),'QUEUED','GREEN',0,lead.target_launch||'',lead.assigned_to||'',lead.project_description||'',cc)]);const c=await DB.prepare('SELECT id FROM clients WHERE code=?').bind(cc).first(),p=await DB.prepare('SELECT id FROM projects WHERE code=?').bind(pc).first();await log(DB,user,`Converted ${lead.code} to ${cc} / ${pc}`,'project',p?.id||null);return reply({ok:true,client_id:c?.id,project_id:p?.id},201);}
+
+  if(method==='GET'&&path==='/api/clients')return reply({items:await rows(DB.prepare(`SELECT c.*,COUNT(DISTINCT p.id) active_projects,COALESCE(SUM(DISTINCT p.value),0) lifetime_value FROM clients c LEFT JOIN projects p ON p.client_id=c.id GROUP BY c.id ORDER BY c.id DESC`))});
