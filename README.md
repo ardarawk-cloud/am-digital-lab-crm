@@ -1,72 +1,86 @@
-# AM DIGITAL LAB — CRM & Internal Dashboard MVP
+# AM DIGITAL LAB CRM
 
-MVP operasional tanpa dependency eksternal. Dibangun dengan Node.js 22 built-in HTTP server + `node:sqlite` + HTML/CSS/JS.
+Internal CRM and project-operations dashboard for **AM DIGITAL LAB**.
 
-## Yang sudah bekerja
+## Current version
 
-- Authentication + session cookie
-- Owner dashboard KPI
-- Sales / leads pipeline
-- Lead status update
-- Convert WON lead → Client + Project
+**v0.2.0 — Operations Core**
+
+### v0.1 foundation
+- Owner login/session
+- Dashboard KPIs
+- Lead pipeline
+- Lead → client/project conversion
 - Client database
-- Project database + progress/health
-- Invoice management
-- Payment recording
-- Outstanding calculation
-- Activity log backend
-- Rule: project tidak dapat diaktifkan keluar dari `QUEUED` sebelum pembayaran DP tercatat
-- Responsive UI desktop/mobile
-- SQLite persistent database
+- Project tracking
+- Invoice and payment recording
+- DP activation lock
+- SQLite persistence
 
-## Jalankan
+### v0.2 modules
+- Structured Project Scope Builder
+- Scope approval / lock control
+- Quotation builder with line items
+- Task Kanban
+- Change Request workflow
+- Approved CR → additional invoice
+- QC / bug tracking
+- Critical QC production blocker
+- Expanded owner attention metrics
+- Modular backend routes and frontend pages
 
-Pastikan Node.js 22+.
+## Business rules enforced
+
+1. Project cannot leave `QUEUED` until a DP payment exists.
+2. `DEVELOPMENT` and later stages require approved scope with at least one in-contract item.
+3. Approved scope blocks requirement edits until explicitly unlocked.
+4. `DEPLOYMENT` and `DELIVERED` are blocked while unresolved `CRITICAL` QC exists.
+5. Change Request must be `APPROVED` before an additional invoice can be generated.
+6. Creating a CR invoice increases project value once.
+7. Payment cannot exceed invoice outstanding balance.
+
+## Architecture
+
+```text
+server.js
+lib/
+  db.js
+  http.js
+  routes-dashboard.js
+  routes-sales.js
+  routes-projects.js
+  routes-commercial.js
+  routes-operations.js
+public/
+  index.html
+  styles.css
+  core.js
+  pages-core.js
+  pages-ops.js
+  modals.js
+```
+
+## Run locally
+
+Requires Node.js 22+.
 
 ```bash
-cd am-digital-lab-crm
+npm run check
 npm start
 ```
 
-Buka:
+Open `http://localhost:8787`.
 
-`http://localhost:8787`
+Pilot login:
+- Email: `admin@amdigital.local`
+- Password: `change-me-123`
 
-### Login awal
+Set `AMDL_ADMIN_PASSWORD` before first run outside the pilot environment.
 
-Email: `admin@amdigital.local`
+## Storage
 
-Password: `change-me-123`
+SQLite is created automatically at `data/amdl-crm.sqlite`. The `data/` directory is gitignored and must not contain committed live client data.
 
-Sebelum production, set password admin lewat environment variable saat database pertama dibuat:
+## Next phase
 
-```bash
-AMDL_ADMIN_PASSWORD="password-yang-kuat" npm start
-```
-
-Jika database demo sudah pernah dibuat, hapus `data/amdl-crm.sqlite` untuk seed ulang. Untuk production, jangan menggunakan cara reset ini; implementasikan change-password flow.
-
-## Struktur
-
-- `server.js` — API, auth, SQLite schema, business rules
-- `public/index.html` — application shell
-- `public/styles.css` — AM DIGITAL LAB SaaS UI
-- `public/app.js` — frontend SPA
-- `data/` — SQLite database saat aplikasi berjalan
-
-## Tahap berikutnya
-
-1. Quotation + Scope of Work builder
-2. PDF export
-3. Tasks / project kanban
-4. Change Request
-5. QC / bugs
-6. Maintenance + hosting recurring revenue
-7. Notifications + follow-up
-8. Client portal
-9. WhatsApp / email integration
-10. Production deployment with HTTPS, backups, secrets, and managed database
-
-## Catatan production
-
-MVP ini cocok untuk development/pilot internal. Sebelum dipakai untuk data client nyata di internet, tambahkan CSRF protection, stronger session lifecycle, password-change/recovery, rate limiting, production reverse proxy/HTTPS, secret management, automated backups, and database migration strategy.
+v0.3: document/PDF generation, follow-up reminders, maintenance and recurring revenue, stronger role/permission controls, production deployment hardening, and client portal foundation.
