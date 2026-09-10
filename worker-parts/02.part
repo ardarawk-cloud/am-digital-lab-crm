@@ -1,0 +1,54 @@
+CREATE INDEX IF NOT EXISTS idx_invoices_project ON invoices(project_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_qc_project ON qc_items(project_id);
+`;
+
+let schemaPromise;
+async function ensureSchema(DB) {
+  if (!DB) throw new Error('D1 binding DB is missing');
+  if (!schemaPromise) schemaPromise = DB.exec(SCHEMA).catch(err => { schemaPromise = null; throw err; });
+  await schemaPromise;
+}
+
+const secureHeaders = {
+  'Content-Type': 'application/json; charset=utf-8',
+  'Cache-Control': 'no-store',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'no-referrer'
+};
+function reply(data, status=200, headers={}) { return new Response(JSON.stringify(data), {status, headers:{...secureHeaders,...headers}}); }
+async function readBody(request) { try { return await request.json(); } catch { return {}; } }
+function cookies(request){const raw=request.headers.get('Cookie')||'';return Object.fromEntries(raw.split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),decodeURIComponent(v.slice(i+1))]}));}
+function match(path,pattern){const a=path.split('/').filter(Boolean),b=pattern.split('/').filter(Boolean);if(a.length!==b.length)return null;const p={};for(let i=0;i<b.length;i++){if(b[i].startsWith(':'))p[b[i].slice(1)]=a[i];else if(a[i]!==b[i])return null;}return p;}
+function today(){return new Date().toISOString().slice(0,10);}
+function safeEqual(a,b){a=String(a??'');b=String(b??'');let diff=a.length^b.length;const n=Math.max(a.length,b.length);for(let i=0;i<n;i++)diff|=(a.charCodeAt(i)||0)^(b.charCodeAt(i)||0);return diff===0;}
+function sessionToken(){const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);return [...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function rows(stmt){const r=await stmt.all();return r.results||[];}
+async function scalar(stmt,key='c'){const r=await stmt.first();return Number(r?.[key]||0);}
+async function nextCode(DB,table,prefix){const allowed=new Set(['leads','clients','projects','quotations','invoices','change_requests','qc_items']);if(!allowed.has(table))throw new Error('Invalid code table');const n=await scalar(DB.prepare(`SELECT COALESCE(MAX(id),0)+1 n FROM ${table}`),'n');return `${prefix}-${new Date().getFullYear()}-${String(n).padStart(3,'0')}`;}
+async function log(DB,user,action,type='',id=null){await DB.prepare('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)').bind(user?.id||null,action,type,id).run();}
+async function updateFields(DB,table,id,data,fields,numberFields=[],booleanFields=[]){const parts=[],vals=[];for(const f of fields){if(Object.hasOwn(data,f)){parts.push(`${f}=?`);let v=data[f];if(numberFields.includes(f))v=Number(v||0);if(booleanFields.includes(f))v=v?1:0;vals.push(v);}}if(!parts.length)return;await DB.prepare(`UPDATE ${table} SET ${parts.join(',')} WHERE id=?`).bind(...vals,Number(id)).run();}
+async function currentUser(request,DB){const token=cookies(request).amdl_session;if(!token)return null;const row=await DB.prepare(`SELECT u.id,u.name,u.email,u.role,s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=?`).bind(token).first();if(!row||new Date(row.expires_at)<=new Date())return null;return row;}
+async function activeProjectAllowed(DB,id){return (await scalar(DB.prepare(`SELECT COALESCE(SUM(p.amount),0) paid FROM payments p JOIN invoices i ON i.id=p.invoice_id WHERE i.project_id=? AND i.type='DP'`).bind(Number(id)),'paid'))>0;}
+async function scopeReady(DB,id){const [p,n]=await Promise.all([DB.prepare('SELECT scope_approved FROM projects WHERE id=?').bind(Number(id)).first(),scalar(DB.prepare('SELECT COUNT(*) c FROM project_scope WHERE project_id=? AND included_contract=1').bind(Number(id)))]);return p&&Number(p.scope_approved)===1&&n>0;}
+async function hasBlockingQc(DB,id){return (await scalar(DB.prepare(`SELECT COUNT(*) c FROM qc_items WHERE project_id=? AND severity='CRITICAL' AND status NOT IN ('PASS','LOCKED')`).bind(Number(id))))>0;}
+
+async function login(request,env){
+  if(!env.AMDL_ADMIN_PASSWORD)return reply({error:'Admin password belum dikonfigurasi di Cloudflare Worker secret.'},503);
+  const d=await readBody(request);const email=String(env.AMDL_ADMIN_EMAIL||'admin@amdigital.local').toLowerCase();
+  if(String(d.email||'').toLowerCase()!==email||!safeEqual(d.password,env.AMDL_ADMIN_PASSWORD))return reply({error:'Email atau password salah.'},401);
+  let user=await env.DB.prepare('SELECT id,name,email,role FROM users WHERE lower(email)=lower(?)').bind(email).first();
+  if(!user){await env.DB.prepare('INSERT INTO users (name,email,role) VALUES (?,?,?)').bind('AM DIGITAL LAB Owner',email,'OWNER').run();user=await env.DB.prepare('SELECT id,name,email,role FROM users WHERE lower(email)=lower(?)').bind(email).first();}
+  const token=sessionToken(),expires=new Date(Date.now()+SESSION_DAYS*86400000).toISOString();
+  await env.DB.batch([env.DB.prepare('DELETE FROM sessions WHERE expires_at<=?').bind(new Date().toISOString()),env.DB.prepare('INSERT INTO sessions (token,user_id,expires_at) VALUES (?,?,?)').bind(token,user.id,expires)]);
+  return reply({ok:true,user,version:VERSION},200,{'Set-Cookie':`amdl_session=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DAYS*86400}`});
+}
+
+async function dashboard(DB){
+  const month=new Date().toISOString().slice(0,7);
+  const batch=await DB.batch([
+    DB.prepare("SELECT COUNT(*) c FROM leads WHERE substr(created_at,1,7)=?").bind(month),
+    DB.prepare("SELECT COUNT(*) c FROM projects WHERE status NOT IN ('DELIVERED','CLOSED')"),
+    DB.prepare("SELECT COALESCE(SUM(amount),0) v FROM payments WHERE substr(COALESCE(NULLIF(payment_date,''),created_at),1,7)=?").bind(month),
+    DB.prepare("SELECT COALESCE(SUM(amount-paid_amount),0) v FROM invoices WHERE status NOT IN ('PAID','CANCELLED')"),
