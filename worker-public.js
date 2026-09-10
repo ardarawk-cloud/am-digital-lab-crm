@@ -1,4 +1,4 @@
-const SITE_VERSION='1.0.2';
+const SITE_VERSION='1.1.0';
 const jsonHeaders={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'strict-origin-when-cross-origin'};
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:jsonHeaders});}
 function primaryDB(env){return env.CRM_DB.getByName('amdl-primary');}
@@ -7,19 +7,24 @@ export default {
   async fetch(request,env){
     const url=new URL(request.url);
     if(url.pathname==='/healthz'){
+      try{const database=await primaryDB(env).health();return json({ok:Boolean(database),service:'am-digital-lab-public',version:SITE_VERSION,crm_database:Boolean(database)});}catch(err){console.error('CRM database health failed',err);return json({ok:false,service:'am-digital-lab-public',version:SITE_VERSION,crm_database:false},503);}
+    }
+
+    if(url.pathname==='/api/event'&&request.method==='POST'){
       try{
-        const database=await primaryDB(env).health();
-        return json({ok:Boolean(database),service:'am-digital-lab-public',version:SITE_VERSION,crm_database:Boolean(database)});
-      }catch(err){
-        console.error('CRM database health failed',err);
-        return json({ok:false,service:'am-digital-lab-public',version:SITE_VERSION,crm_database:false},503);
-      }
+        const raw=await request.text();if(raw.length>2000)return json({error:'Request too large.'},413);
+        let d={};try{d=JSON.parse(raw||'{}')}catch{return json({error:'Invalid request.'},400)}
+        const allowed=new Set(['cta_click','portfolio_filter','lead_submit']);const event=String(d.event||'').slice(0,60);if(!allowed.has(event))return json({error:'Invalid event.'},400);
+        const label=String(d.label||'').slice(0,120),path=String(d.path||'/').slice(0,240),DB=primaryDB(env);
+        await DB.exec('CREATE TABLE IF NOT EXISTS public_events (id INTEGER PRIMARY KEY AUTOINCREMENT,event TEXT NOT NULL,label TEXT DEFAULT "",path TEXT DEFAULT "/",created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)');
+        await DB.run('INSERT INTO public_events (event,label,path) VALUES (?,?,?)',[event,label,path]);
+        return new Response(null,{status:204,headers:{'cache-control':'no-store'}});
+      }catch(err){console.error('Public event write failed',err);return new Response(null,{status:204});}
     }
 
     if(url.pathname==='/api/start-project'&&request.method==='POST'){
       try{
-        const raw=await request.text();
-        if(raw.length>16000)return json({error:'Request too large.'},413);
+        const raw=await request.text();if(raw.length>16000)return json({error:'Request too large.'},413);
         let d={};try{d=JSON.parse(raw||'{}')}catch{return json({error:'Invalid request.'},400)}
         if(d.website)return json({ok:true},201);
         const name=String(d.name||'').trim().slice(0,120),email=String(d.email||'').trim().slice(0,180),phone=String(d.phone||'').trim().slice(0,80);
@@ -33,18 +38,10 @@ export default {
         await DB.run('UPDATE leads SET code=? WHERE id=?',[code,id]);
         await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Public website lead ${code}`,'lead',id]);
         return json({ok:true,id,code},201);
-      }catch(err){
-        console.error('Project inquiry database write failed',err);
-        return json({error:'Project inquiry service is temporarily unavailable.'},502);
-      }
+      }catch(err){console.error('Project inquiry database write failed',err);return json({error:'Project inquiry service is temporarily unavailable.'},502);}
     }
 
     if(url.pathname.startsWith('/api/'))return json({error:'Not found.'},404);
-    const response=await env.ASSETS.fetch(request);
-    const headers=new Headers(response.headers);
-    headers.set('X-Content-Type-Options','nosniff');
-    headers.set('Referrer-Policy','strict-origin-when-cross-origin');
-    headers.set('Permissions-Policy','camera=(), microphone=(), geolocation=()');
-    return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+    const response=await env.ASSETS.fetch(request);const headers=new Headers(response.headers);headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','strict-origin-when-cross-origin');headers.set('Permissions-Policy','camera=(), microphone=(), geolocation=()');headers.set('X-Frame-Options','DENY');return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
   }
 };
