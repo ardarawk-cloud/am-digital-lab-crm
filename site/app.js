@@ -1,112 +1,57 @@
-const upgradeCss=document.createElement('link');
-upgradeCss.rel='stylesheet';
-upgradeCss.href='/upgrade.css';
-document.head.appendChild(upgradeCss);
+for(const href of ['/upgrade.css','/showcase.css']){const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)}
 
 const logoHtml='<img src="/logo.svg" alt="AM DIGITAL LAB">';
-document.querySelectorAll('.brand-mark').forEach(el=>{el.innerHTML=logoHtml;});
-document.querySelectorAll('.mini-logo').forEach(el=>{el.innerHTML=logoHtml;});
+document.querySelectorAll('.brand-mark,.mini-logo').forEach(el=>{el.innerHTML=logoHtml});
 
 const navMenu=document.getElementById('navMenu');
 const pricingNav=navMenu?.querySelector('a[href="#pricing"]');
-if(navMenu&&pricingNav&&!navMenu.querySelector('a[href="#work"]')){
-  const workLink=document.createElement('a');
-  workLink.href='#work';
-  workLink.textContent='Work';
-  navMenu.insertBefore(workLink,pricingNav);
-}
+if(navMenu&&pricingNav&&!navMenu.querySelector('a[href="#work"]')){const a=document.createElement('a');a.href='#work';a.textContent='Work';navMenu.insertBefore(a,pricingNav)}
 
-const pricingValues=[
-  ['Landing Page','Rp2.500.000','starting'],
-  ['Business Website','Rp7.500.000','starting'],
-  ['Android Starter','Rp9.500.000','starting'],
-  ['Custom Web App','Rp15.000.000','starting'],
-  ['AI Chatbot','Rp5.000.000','starting'],
-  ['Maintenance','Rp750.000','/ month']
-];
-document.querySelectorAll('.price-card').forEach(card=>{
-  const title=card.querySelector('h3')?.textContent.trim();
-  const row=pricingValues.find(([name])=>name===title);
-  if(row){
-    const strong=card.querySelector('strong');
-    if(strong)strong.innerHTML=`${row[1]}<small> ${row[2]}</small>`;
-  }
-});
-
+const pricingValues=[['Landing Page','Rp2.500.000','starting'],['Business Website','Rp7.500.000','starting'],['Android Starter','Rp9.500.000','starting'],['Custom Web App','Rp15.000.000','starting'],['AI Chatbot','Rp5.000.000','starting'],['Maintenance','Rp750.000','/ month']];
+document.querySelectorAll('.price-card').forEach(card=>{const row=pricingValues.find(([n])=>n===card.querySelector('h3')?.textContent.trim());if(row){const s=card.querySelector('strong');if(s)s.innerHTML=`${row[1]}<small> ${row[2]}</small>`}});
 const budgetSelect=document.querySelector('select[name="budget_range"]');
-if(budgetSelect){
-  const labels={
-    'Under Rp5M':'Under Rp5.000.000',
-    'Rp5M–10M':'Rp5.000.000–Rp10.000.000',
-    'Rp10M–20M':'Rp10.000.000–Rp20.000.000',
-    'Rp20M–50M':'Rp20.000.000–Rp50.000.000',
-    'Rp50M+':'Rp50.000.000+'
-  };
-  [...budgetSelect.options].forEach(option=>{if(labels[option.textContent])option.textContent=labels[option.textContent];});
-}
+if(budgetSelect){const labels={'Under Rp5M':'Under Rp5.000.000','Rp5M–10M':'Rp5.000.000–Rp10.000.000','Rp10M–20M':'Rp10.000.000–Rp20.000.000','Rp20M–50M':'Rp20.000.000–Rp50.000.000','Rp50M+':'Rp50.000.000+'};[...budgetSelect.options].forEach(o=>{if(labels[o.textContent])o.textContent=labels[o.textContent]})}
 
-const workSection=document.createElement('section');
-workSection.className='section work-section';
-workSection.id='work';
-workSection.innerHTML=`
-  <div class="container">
-    <div class="section-head">
-      <div><span class="kicker">SELECTED BUILDS</span><h2>Products and systems already built in our ecosystem.</h2></div>
-      <p class="work-intro">A selection of internal products, active builds and real business systems across web, mobile, AI, cloud and connected experiences.</p>
-    </div>
-    <div class="work-grid">
-      <article class="work-card"><div class="work-top"><span class="work-type">ENTERPRISE PLATFORM</span><span class="work-state">ACTIVE</span></div><h3>ACC OS X</h3><p>Enterprise operating system for managing channels, production workflows, AI-assisted operations, publishing and connected workspaces.</p><div class="work-stack"><span>Cloudflare</span><span>AI Workflow</span><span>Dashboard</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">BUSINESS SYSTEM</span><span class="work-state">LIVE</span></div><h3>AM DIGITAL LAB CRM</h3><p>Cloud-native CRM for leads, clients, projects, quotations, invoices, tasks, change requests, QC and project operations.</p><div class="work-stack"><span>Cloudflare Workers</span><span>SQLite</span><span>CRM</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">HOSPITALITY WEB</span><span class="work-state">DEMO</span></div><h3>ZUZU Family House</h3><p>Premium hospitality website with availability flow, booking experience, admin dashboard, finance view, rates and marketing controls.</p><div class="work-stack"><span>Booking</span><span>Admin</span><span>Analytics</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">ANDROID / CONNECTIVITY</span><span class="work-state">ALPHA</span></div><h3>OFFGRID</h3><p>Offline-first mesh communication application designed around local device-to-device connectivity and resilient communication flows.</p><div class="work-stack"><span>Android</span><span>Mesh</span><span>Offline-first</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">MOBILE + GAME INTEGRATION</span><span class="work-state">PILOT</span></div><h3>BBYA Music Manager</h3><p>Playlist and library management workflow that connects mobile music operations with synchronized Roblox audio experiences.</p><div class="work-stack"><span>Android</span><span>Roblox</span><span>Sync</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">MUSIC TECH</span><span class="work-state">ACTIVE</span></div><h3>AM STUDIO Music Distribution</h3><p>Music operations product for structured release and distribution workflows, built as a dedicated mobile system.</p><div class="work-stack"><span>Android</span><span>Workflow</span><span>Music</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">SOCIAL PLATFORM</span><span class="work-state">ACTIVE BUILD</span></div><h3>KIN</h3><p>Modern social platform concept centered on visual posting, profiles, personal spaces, people discovery, privacy circles and chat.</p><div class="work-stack"><span>Social</span><span>Mobile</span><span>Product Design</span></div></article>
-      <article class="work-card"><div class="work-top"><span class="work-type">AI APPLICATION</span><span class="work-state">STABLE TEST</span></div><h3>ORACLY</h3><p>AI-focused application built through the AM/ACC product ecosystem, with automated Android build and testing workflow.</p><div class="work-stack"><span>AI</span><span>Android</span><span>Automation</span></div></article>
-    </div>
-    <p class="portfolio-note">Selected builds shown here include internal products, R&amp;D systems and active product development—not only commissioned client work.</p>
-  </div>`;
-const pricingSection=document.getElementById('pricing');
-pricingSection?.parentNode.insertBefore(workSection,pricingSection);
+const projects=[
+{type:'web',label:'ENTERPRISE PLATFORM',status:'ACTIVE',name:'ACC OS X',desc:'Enterprise operating system for production workflows, channels, AI-assisted operations, publishing and connected workspaces.',stack:['Cloudflare','AI Workflow','Dashboard']},
+{type:'web',label:'BUSINESS SYSTEM',status:'LIVE',name:'AM DIGITAL LAB CRM',desc:'Cloud-native CRM covering leads, clients, projects, quotations, invoices, tasks, change requests and QC.',stack:['Workers','SQLite','CRM']},
+{type:'web',label:'HOSPITALITY WEB',status:'DEMO',name:'ZUZU Family House',desc:'Premium hospitality website with availability, booking flow, admin dashboard, finance, rates and marketing controls.',stack:['Booking','Admin','Analytics']},
+{type:'apk',label:'ANDROID / CONNECTIVITY',status:'ALPHA',name:'OFFGRID',desc:'Offline-first mesh communication app designed around resilient local device-to-device connectivity.',stack:['Android','Mesh','Offline-first']},
+{type:'apk',label:'MOBILE + GAME',status:'PILOT',name:'BBYA Music Manager',desc:'Mobile playlist and library workflow synchronized with Roblox audio experiences and area-based playback.',stack:['Android','Roblox','Sync']},
+{type:'apk',label:'MUSIC TECH',status:'ACTIVE',name:'AM STUDIO Music Distribution',desc:'Dedicated mobile product for structured music release and distribution operations.',stack:['Android','Workflow','Music']},
+{type:'apk',label:'SOCIAL PLATFORM',status:'ACTIVE BUILD',name:'KIN',desc:'Modern social platform centered on visual posting, profiles, personal spaces, people discovery, privacy circles and chat.',stack:['Social','Mobile','UX']},
+{type:'apk',label:'COMMUNICATION',status:'RC',name:'MOSHI',desc:'Android communication product developed through staged release candidates with CI validation and physical-device QC.',stack:['Android','CI','Release']},
+{type:'apk',label:'AI APPLICATION',status:'STABLE TEST',name:'ORACLY',desc:'AI-focused application developed inside the AM/ACC product ecosystem with automated Android build and testing.',stack:['AI','Android','Automation']},
+{type:'apk',label:'UTILITY APP',status:'STABLE',name:'ACC Cleaner',desc:'Android utility product focused on device cleanup and practical maintenance workflows.',stack:['Android','Utility','System']},
+{type:'apk',label:'AI TOOL',status:'STABLE',name:'AI Mashup',desc:'Experimental AI product combining multiple AI-assisted workflows into one mobile experience.',stack:['AI','Android','Experiment']},
+{type:'apk',label:'PRODUCT BUILDER',status:'ACTIVE BUILD',name:'WONDERPOCKET',desc:'Interactive mobile product with visual social core, runtime QC discipline and evolving user experiences.',stack:['Mobile','Runtime QC','Product']}
+];
 
-const menuBtn=document.getElementById('menuBtn');
-menuBtn?.addEventListener('click',()=>navMenu.classList.toggle('open'));
-navMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navMenu.classList.remove('open')));
+function browserMock(){return `<div class="device-browser"><div class="browser-bar"><i></i><i></i><i></i><span></span></div><div class="browser-ui"><div class="browser-side"><b></b><b></b><b></b><b></b></div><div class="browser-main"><div class="ui-title"></div><div class="ui-kpis"><i></i><i></i><i></i></div><div class="ui-chart"></div><div class="ui-rows"><i></i><i></i><i></i></div></div></div></div>`}
+function phoneMock(){return `<div class="device-phone"><div class="phone-notch"></div><div class="phone-screen"><div class="phone-head"><b></b><i></i></div><div class="phone-hero"></div><div class="phone-stats"><i></i><i></i></div><div class="phone-list"><span></span><span></span><span></span></div><div class="phone-nav"></div></div></div>`}
 
-const form=document.getElementById('projectForm');
-const statusEl=document.getElementById('formStatus');
-const submitBtn=document.getElementById('submitBtn');
+const workSection=document.createElement('section');workSection.className='section portfolio-v2';workSection.id='work';
+workSection.innerHTML=`<div class="container"><div class="section-head"><div><span class="kicker">SELECTED BUILDS</span><h2>Web systems and apps shown like real products.</h2></div><p>Selected internal products, active builds and business systems across web, mobile, AI, cloud and connected experiences.</p></div><div class="portfolio-filter"><button class="active" data-filter="all">All Projects</button><button data-filter="web">Web / Systems</button><button data-filter="apk">APK / Mobile</button></div><div class="showcase-grid">${projects.map(p=>`<article class="showcase-card" data-kind="${p.type}"><div class="showcase-preview">${p.type==='web'?browserMock():phoneMock()}</div><div class="showcase-info"><div class="showcase-top"><span class="showcase-type">${p.label}</span><span class="showcase-status">${p.status}</span></div><h3>${p.name}</h3><p>${p.desc}</p><div class="showcase-stack">${p.stack.map(s=>`<span>${s}</span>`).join('')}</div></div></article>`).join('')}</div><p class="portfolio-note-v2">Portfolio ini mencakup internal products, R&amp;D dan active builds. Trade dan Kasino tidak ditampilkan pada portfolio publik.</p></div>`;
+const pricingSection=document.getElementById('pricing');pricingSection?.parentNode.insertBefore(workSection,pricingSection);
 
-form?.addEventListener('submit',async e=>{
-  e.preventDefault();
-  const fd=new FormData(form);
-  const data=Object.fromEntries(fd.entries());
-  if(!data.name||(!data.email&&!data.phone)){
-    statusEl.textContent='Please enter your name and at least an email or WhatsApp number.';
-    statusEl.className='error';
-    return;
-  }
-  submitBtn.disabled=true;
-  submitBtn.textContent='Sending...';
-  statusEl.textContent='Sending your project inquiry to AM DIGITAL LAB...';
-  statusEl.className='';
-  try{
-    const res=await fetch('/api/start-project',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});
-    const body=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(body.error||'Unable to send inquiry.');
-    form.reset();
-    statusEl.textContent=`Inquiry received · ${body.code||'AMDL'}. We can now review it from our internal project pipeline.`;
-    statusEl.className='success';
-  }catch(err){
-    statusEl.textContent=err.message||'Something went wrong. Please try again.';
-    statusEl.className='error';
-  }finally{
-    submitBtn.disabled=false;
-    submitBtn.textContent='Send Project Inquiry';
-  }
-});
+document.querySelectorAll('.portfolio-filter button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.portfolio-filter button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;document.querySelectorAll('.showcase-card').forEach(c=>{c.hidden=f!=='all'&&c.dataset.kind!==f});track('portfolio_filter',f)}));
 
-const observer=new IntersectionObserver(entries=>{
-  entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('in-view')});
-},{threshold:.08});
-document.querySelectorAll('.service-card,.solution-grid article,.price-card,.process-grid div,.work-card').forEach(el=>observer.observe(el));
+const trust=document.createElement('section');trust.className='section trust-v2';trust.innerHTML=`<div class="container"><div class="section-head"><div><span class="kicker">WORKING STANDARD</span><h2>Built with business rules, not random revisions.</h2></div><p>Every project moves through a clear scope, milestone, QC and deployment flow.</p></div><div class="trust-cards"><div class="trust-card"><b>Scope before build</b><p>Requirements and priorities are locked before development starts.</p></div><div class="trust-card"><b>Milestone payment</b><p>Standard structure: 50% DP, 30% development milestone, 20% before handover.</p></div><div class="trust-card"><b>QC before production</b><p>Critical issues block deployment until they are resolved and verified.</p></div><div class="trust-card"><b>30-day bug warranty</b><p>Post-launch bug-fix warranty applies to the approved delivered scope.</p></div></div></div>`;document.getElementById('about')?.parentNode.insertBefore(trust,document.getElementById('about'));
+
+const faq=document.createElement('section');faq.className='section';faq.id='faq';faq.innerHTML=`<div class="container faq-grid"><div><span class="kicker">FAQ</span><h2>Before we start.</h2><p class="work-intro">Common questions before a project enters discovery and quotation.</p></div><div class="faq-list"><details><summary>Can you continue or repair an existing website/app?</summary><p>Yes. Existing products can be audited, repaired, modernized or extended after the current source and scope are reviewed.</p></details><details><summary>Can a project start small first?</summary><p>Yes. We can define an MVP or Phase 1 first, then add automation, AI, analytics or scaling features later.</p></details><details><summary>Are hosting, domain and third-party fees included?</summary><p>Only when stated in the quotation. Provider costs, API usage, payment gateway and similar third-party fees are normally quoted separately.</p></details><details><summary>What happens if features change after scope approval?</summary><p>New features become a documented Change Request with separate impact on price and timeline.</p></details><details><summary>Do you provide maintenance after launch?</summary><p>Yes. Monthly maintenance, hosting management, monitoring and feature upgrades can continue after handover.</p></details></div></div>`;document.getElementById('start')?.parentNode.insertBefore(faq,document.getElementById('start'));
+
+const floating=document.createElement('button');floating.className='floating-contact';floating.textContent='Start a Project';floating.addEventListener('click',()=>{document.getElementById('start')?.scrollIntoView({behavior:'smooth'});track('cta_click','floating')});document.body.appendChild(floating);
+
+const menuBtn=document.getElementById('menuBtn');menuBtn?.addEventListener('click',()=>navMenu.classList.toggle('open'));navMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{navMenu.classList.remove('open');if(a.getAttribute('href')==='#start')track('cta_click','nav')}));
+
+aSyncMeta();
+function aSyncMeta(){const canonical='https://am-digital-lab.ardarawk.workers.dev/';if(!document.querySelector('link[rel="canonical"]')){const l=document.createElement('link');l.rel='canonical';l.href=canonical;document.head.appendChild(l)}const metas=[['property','og:title','AM DIGITAL LAB — Website, Apps, Business Systems & AI'],['property','og:description','We build digital products for modern businesses.'],['property','og:type','website'],['property','og:url',canonical],['name','twitter:card','summary'],['name','robots','index,follow,max-image-preview:large']];for(const [attr,key,val] of metas){if(!document.querySelector(`meta[${attr}="${key}"]`)){const m=document.createElement('meta');m.setAttribute(attr,key);m.content=val;document.head.appendChild(m)}}const icon=document.createElement('link');icon.rel='icon';icon.href='/logo.svg';icon.type='image/svg+xml';document.head.appendChild(icon)}
+
+async function track(event,label=''){try{navigator.sendBeacon?.('/api/event',new Blob([JSON.stringify({event,label,path:location.pathname})],{type:'application/json'}))||fetch('/api/event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({event,label,path:location.pathname}),keepalive:true})}catch{}}
+
+document.querySelectorAll('a.btn,a.nav-cta').forEach(a=>a.addEventListener('click',()=>track('cta_click',a.textContent.trim())));
+
+const form=document.getElementById('projectForm'),statusEl=document.getElementById('formStatus'),submitBtn=document.getElementById('submitBtn');
+form?.addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form).entries());if(!data.name||(!data.email&&!data.phone)){statusEl.textContent='Please enter your name and at least an email or WhatsApp number.';statusEl.className='error';return}submitBtn.disabled=true;submitBtn.textContent='Sending...';statusEl.textContent='Sending your project inquiry to AM DIGITAL LAB...';statusEl.className='';try{const res=await fetch('/api/start-project',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||'Unable to send inquiry.');form.reset();statusEl.textContent=`Inquiry received · ${body.code||'AMDL'}. We can now review it from our internal project pipeline.`;statusEl.className='success';track('lead_submit',body.code||'success')}catch(err){statusEl.textContent=err.message||'Something went wrong. Please try again.';statusEl.className='error'}finally{submitBtn.disabled=false;submitBtn.textContent='Send Project Inquiry'}});
+
+const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('in-view')})},{threshold:.08});document.querySelectorAll('.service-card,.solution-grid article,.price-card,.process-grid div,.showcase-card,.trust-card').forEach(el=>observer.observe(el));
