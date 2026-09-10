@@ -1,0 +1,79 @@
+import { DurableObject } from "cloudflare:workers";
+
+export class CRMDatabase extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.sql = ctx.storage.sql;
+  }
+
+  _result(sql, params = []) {
+    const cursor = this.sql.exec(sql, ...params);
+    const results = cursor.toArray();
+    let lastRowId = 0;
+    if (/^\s*insert\b/i.test(sql)) {
+      const row = this.sql.exec('SELECT last_insert_rowid() AS id').one();
+      lastRowId = Number(row?.id || 0);
+    }
+    return {
+      success: true,
+      results,
+      meta: {
+        last_row_id: lastRowId,
+        rows_read: Number(cursor.rowsRead || 0),
+        rows_written: Number(cursor.rowsWritten || 0)
+      }
+    };
+  }
+
+  async exec(sql) {
+    this.sql.exec(sql);
+    return { success: true };
+  }
+
+  async all(sql, params = []) {
+    return this._result(sql, params);
+  }
+
+  async first(sql, params = []) {
+    const result = this._result(sql, params);
+    return result.results[0] || null;
+  }
+
+  async run(sql, params = []) {
+    return this._result(sql, params);
+  }
+
+  async batch(specs = []) {
+    return this.ctx.storage.transactionSync(() => specs.map(spec => this._result(spec.sql, spec.params || [])));
+  }
+
+  async health() {
+    const row = this.sql.exec("SELECT 1 AS ok").one();
+    return Number(row?.ok || 0) === 1;
+  }
+}
+
+class DurableStatement {
+  constructor(stub, sql, params = []) {
+    this.stub = stub;
+    this.sql = sql;
+    this.params = params;
+  }
+  bind(...params) { return new DurableStatement(this.stub, this.sql, params); }
+  all() { return this.stub.all(this.sql, this.params); }
+  first() { return this.stub.first(this.sql, this.params); }
+  run() { return this.stub.run(this.sql, this.params); }
+}
+
+function durableDB(namespace) {
+  const stub = namespace.getByName('amdl-primary');
+  return {
+    prepare(sql) { return new DurableStatement(stub, sql); },
+    exec(sql) { return stub.exec(sql); },
+    batch(statements) {
+      return stub.batch(statements.map(s => ({ sql: s.sql, params: s.params || [] })));
+    },
+    health() { return stub.health(); }
+  };
+}
+
