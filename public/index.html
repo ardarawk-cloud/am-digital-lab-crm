@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b0f14" />
-  <title>AM DIGITAL LAB — CRM v0.2.0</title>
+  <title>AM DIGITAL LAB — CRM v0.3.0</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -12,20 +12,20 @@
     <div class="login-card">
       <div class="brand-mark">AM</div>
       <h1>AM DIGITAL LAB</h1>
-      <p>CRM & Internal Dashboard <span class="version">v0.2.0</span></p>
+      <p>CRM & Internal Dashboard <span class="version">v0.3.0</span></p>
       <form id="loginForm">
-        <label>Email<input id="loginEmail" type="email" value="admin@amdigital.local" required></label>
-        <label>Password<input id="loginPassword" type="password" value="change-me-123" required></label>
+        <label>Email<input id="loginEmail" type="email" value="admin@amdigital.local" autocomplete="username" required></label>
+        <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label>
         <button class="primary" type="submit">Masuk ke Dashboard</button>
         <div id="loginError" class="error"></div>
       </form>
-      <small>Default password hanya untuk pilot build. Gunakan environment variable <b>AMDL_ADMIN_PASSWORD</b> sebelum production.</small>
+      <small>Cloudflare production build · Workers + D1. Password disimpan sebagai Worker secret, tidak pernah ditanam di source code.</small>
     </div>
   </div>
 
   <div id="app" class="app hidden">
     <aside class="sidebar">
-      <div class="brand"><span class="brand-mark small">AM</span><div><b>AM DIGITAL LAB</b><span>Internal CRM · v0.2.0</span></div></div>
+      <div class="brand"><span class="brand-mark small">AM</span><div><b>AM DIGITAL LAB</b><span>Internal CRM · Cloudflare</span></div></div>
       <nav id="nav">
         <button data-page="dashboard" class="active">Dashboard</button>
         <button data-page="leads">Sales / Leads</button>
