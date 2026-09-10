@@ -12,6 +12,25 @@
 
 async function api(request,env,url){
   const DB=env.DB, method=request.method, path=url.pathname;
+
+  if(path==='/api/public/leads'&&method==='OPTIONS'){
+    return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':'https://am-digital-lab.ardarawk.workers.dev','Access-Control-Allow-Methods':'POST,OPTIONS','Access-Control-Allow-Headers':'content-type','Access-Control-Max-Age':'86400'}});
+  }
+  if(path==='/api/public/leads'&&method==='POST'){
+    const origin=request.headers.get('Origin')||'';
+    if(origin&&origin!=='https://am-digital-lab.ardarawk.workers.dev')return reply({error:'Origin not allowed.'},403);
+    const d=await readBody(request);
+    if(d.website)return reply({ok:true},201,{'Access-Control-Allow-Origin':'https://am-digital-lab.ardarawk.workers.dev'});
+    const name=String(d.name||'').trim().slice(0,120), email=String(d.email||'').trim().slice(0,180), phone=String(d.phone||'').trim().slice(0,80);
+    if(!name||(!email&&!phone))return reply({error:'Nama dan minimal email atau WhatsApp wajib diisi.'},400,{'Access-Control-Allow-Origin':'https://am-digital-lab.ardarawk.workers.dev'});
+    const code=await nextCode(DB,'leads','AMD-L');
+    const description=String(d.project_description||'').trim().slice(0,3000);
+    const notes=['Public website inquiry',d.company?`Company: ${String(d.company).slice(0,160)}`:'',d.target_launch?`Target: ${String(d.target_launch).slice(0,80)}`:''].filter(Boolean).join(' · ');
+    const r=await DB.prepare(`INSERT INTO leads (code,name,company,phone,email,source,project_type,project_description,budget_range,target_launch,status,potential_value,assigned_to,last_contact,next_followup,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(code,name,String(d.company||'').slice(0,160),phone,email,'Public Website',String(d.project_type||'Website').slice(0,120),description,String(d.budget_range||'').slice(0,80),String(d.target_launch||'').slice(0,80),'NEW',0,'','','',notes).run();
+    const id=Number(r.meta?.last_row_id||0);await log(DB,null,`Public website lead ${code}`,'lead',id);
+    return reply({ok:true,id,code},201,{'Access-Control-Allow-Origin':'https://am-digital-lab.ardarawk.workers.dev'});
+  }
+
   if(method==='POST'&&path==='/api/login')return login(request,env);
   if(method==='POST'&&path==='/api/logout'){
     const t=cookies(request).amdl_session;if(t)await DB.prepare('DELETE FROM sessions WHERE token=?').bind(t).run();
