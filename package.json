@@ -1,0 +1,12 @@
+{
+  "name": "am-digital-lab-crm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AM DIGITAL LAB CRM & Internal Dashboard MVP",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
