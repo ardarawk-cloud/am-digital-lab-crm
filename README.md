@@ -4,30 +4,33 @@ Internal CRM and project-operations dashboard for **AM DIGITAL LAB**.
 
 ## Current version
 
-**v0.2.0 — Operations Core**
+**v0.3.0 — Cloudflare Native**
 
-### v0.1 foundation
-- Owner login/session
+Production architecture:
+
+```text
+GitHub main
+   ↓
+Cloudflare Workers + Static Assets
+   ↓
+Cloudflare D1 (binding: DB)
+```
+
+The previous Node + local SQLite / Railway path is retired from `main`.
+
+## Active modules
+
+- Owner login + secure session
 - Dashboard KPIs
-- Lead pipeline
-- Lead → client/project conversion
-- Client database
-- Project tracking
-- Invoice and payment recording
-- DP activation lock
-- SQLite persistence
-
-### v0.2 modules
-- Structured Project Scope Builder
-- Scope approval / lock control
-- Quotation builder with line items
-- Task Kanban
-- Change Request workflow
-- Approved CR → additional invoice
-- QC / bug tracking
-- Critical QC production blocker
-- Expanded owner attention metrics
-- Modular backend routes and frontend pages
+- Lead pipeline and Lead → Client + Project conversion
+- Clients
+- Projects with DP activation gate
+- Scope Builder + approval/lock
+- Quotations with structured line items
+- Tasks / Kanban
+- Change Requests + CR invoice generation
+- QC / Bugs + CRITICAL production blocker
+- Invoices + payments + outstanding
 
 ## Business rules enforced
 
@@ -35,52 +38,52 @@ Internal CRM and project-operations dashboard for **AM DIGITAL LAB**.
 2. `DEVELOPMENT` and later stages require approved scope with at least one in-contract item.
 3. Approved scope blocks requirement edits until explicitly unlocked.
 4. `DEPLOYMENT` and `DELIVERED` are blocked while unresolved `CRITICAL` QC exists.
-5. Change Request must be `APPROVED` before an additional invoice can be generated.
+5. Change Request must be `APPROVED` before its additional invoice can be generated.
 6. Creating a CR invoice increases project value once.
 7. Payment cannot exceed invoice outstanding balance.
 
-## Architecture
+## Cloudflare configuration
+
+Worker source is kept in ordered `worker-parts/*.part` files and assembled by `npm run build` before deploy.
+
+`wrangler.jsonc` defines:
+
+- Worker: `am-digital-lab-crm`
+- Static assets: `./public`
+- D1 binding: `DB`
+- API-first routes: `/api/*`, `/healthz`
+
+Wrangler 4.115 is used by the deploy workflow. D1 is declared by binding and may be provisioned/link automatically by current Wrangler resource provisioning.
+
+## Required secret
+
+Set the Worker secret:
 
 ```text
-server.js
-lib/
-  db.js
-  http.js
-  routes-dashboard.js
-  routes-sales.js
-  routes-projects.js
-  routes-commercial.js
-  routes-operations.js
-public/
-  index.html
-  styles.css
-  core.js
-  pages-core.js
-  pages-ops.js
-  modals.js
+AMDL_ADMIN_PASSWORD
 ```
 
-## Run locally
+Admin email defaults to:
 
-Requires Node.js 22+.
+```text
+admin@amdigital.local
+```
+
+No production password is committed to this repository.
+
+## Local development
 
 ```bash
-npm run check
-npm start
+npm install
+cp .dev.vars.example .dev.vars
+# edit .dev.vars with your local password
+npm run dev
 ```
 
-Open `http://localhost:8787`.
+## Health
 
-Pilot login:
-- Email: `admin@amdigital.local`
-- Password: `change-me-123`
+```text
+GET /healthz
+```
 
-Set `AMDL_ADMIN_PASSWORD` before first run outside the pilot environment.
-
-## Storage
-
-SQLite is created automatically at `data/amdl-crm.sqlite`. The `data/` directory is gitignored and must not contain committed live client data.
-
-## Next phase
-
-v0.3: document/PDF generation, follow-up reminders, maintenance and recurring revenue, stronger role/permission controls, production deployment hardening, and client portal foundation.
+Expected version marker: `0.3.0-cloudflare`.
