@@ -2,7 +2,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const state = { user:null, page:'dashboard', clients:[], projects:[], leads:[], invoices:[], selectedProject:null, taskProject:'' };
 const fmt = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
-const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
+const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const today = () => new Date().toISOString().slice(0,10);
 let leadBadgeTimer=null;
 
@@ -75,7 +75,7 @@ async function render(){
     if(state.page==='projects')return renderProjects();
     if(state.page==='quotations')return renderQuotations();
     if(state.page==='tasks')return renderTasks();
-    if(state.page==='changes')return renderChanges();
+    if(state.page==='changes')return renderChangeRequests();
     if(state.page==='qc')return renderQc();
     if(state.page==='finance')return renderFinance();
   }catch(e){$('#content').innerHTML=`<div class="card danger">${esc(e.message)}</div>`}
