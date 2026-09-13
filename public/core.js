@@ -2,8 +2,9 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const state = { user:null, page:'dashboard', clients:[], projects:[], leads:[], invoices:[], selectedProject:null, taskProject:'' };
 const fmt = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
-const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const esc = s => String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
 const today = () => new Date().toISOString().slice(0,10);
+let leadBadgeTimer=null;
 
 async function api(url,opt={}) {
   const r = await fetch(url,{headers:{'Content-Type':'application/json',...(opt.headers||{})},...opt});
@@ -12,16 +13,36 @@ async function api(url,opt={}) {
   return d;
 }
 
+async function refreshLeadBadge(){
+  if(!state.user)return;
+  try{
+    const d=await api('/api/dashboard');
+    const count=Math.max(0,Number(d?.kpis?.newLeads||0));
+    const btn=$('#nav [data-page="leads"]');
+    if(!btn)return;
+    let chip=btn.querySelector('.nav-count');
+    if(!chip){chip=document.createElement('span');chip.className='nav-count';btn.appendChild(chip)}
+    chip.textContent=count>99?'99+':String(count);
+    chip.hidden=count===0;
+    btn.classList.toggle('has-unread',count>0);
+  }catch{}
+}
+function startLeadBadgePolling(){
+  clearInterval(leadBadgeTimer);
+  refreshLeadBadge();
+  leadBadgeTimer=setInterval(refreshLeadBadge,60000);
+}
+
 async function init(){try{const r=await api('/api/me');state.user=r.user;showApp()}catch{showLogin()}}
 function showLogin(){$('#login').classList.remove('hidden');$('#app').classList.add('hidden')}
-function showApp(){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#userName').textContent=`${state.user.name} · ${state.user.role}`;navigate('dashboard')}
+function showApp(){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#userName').textContent=`${state.user.name} · ${state.user.role}`;navigate('dashboard');startLeadBadgePolling()}
 
 $('#loginForm').addEventListener('submit',async e=>{
   e.preventDefault(); $('#loginError').textContent='';
   try{const r=await api('/api/login',{method:'POST',body:JSON.stringify({email:$('#loginEmail').value,password:$('#loginPassword').value})});state.user=r.user;showApp()}
   catch(err){$('#loginError').textContent=err.message}
 });
-$('#logoutBtn').onclick=async()=>{await api('/api/logout',{method:'POST'});state.user=null;showLogin()};
+$('#logoutBtn').onclick=async()=>{clearInterval(leadBadgeTimer);await api('/api/logout',{method:'POST'});state.user=null;showLogin()};
 $('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)navigate(b.dataset.page)});
 
 const pageMeta={
@@ -44,6 +65,7 @@ async function navigate(page){
   $('#quickAdd').textContent=quickLabels[page]||'+ New';
   $('#quickAdd').onclick=()=>({leads:openLeadModal,clients:openClientModal,projects:openProjectModal,quotations:openQuotationModal,tasks:openTaskModal,changes:openChangeModal,qc:openQcModal,finance:openInvoiceModal,dashboard:openLeadModal}[page]||openLeadModal)();
   await render();
+  refreshLeadBadge();
 }
 async function render(){
   try{
