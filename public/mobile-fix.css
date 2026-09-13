@@ -3,10 +3,17 @@ html,body{max-width:100%;overflow-x:hidden}
 main,#content,.section-grid,.section-grid>*,.split,.split>*,.card,.table-wrap{min-width:0;max-width:100%}
 .table-wrap{width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 
+#nav button{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#nav button.has-unread{color:#fff;background:#17202b}
+.nav-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ff6b6b;color:#fff;font-size:10px;font-weight:900;line-height:1;box-shadow:0 0 0 2px #0c1117}
+.nav-count[hidden]{display:none!important}
+
 @media(max-width:760px){
   .section-grid{width:100%;min-width:0}
   .section-grid>div{width:100%;min-width:0;max-width:100%}
   .section-grid .card,.section-grid .table-wrap{width:100%;max-width:100%}
   .section-grid .list-item,.section-grid .list-item>div{min-width:0}
   .section-grid .list-item b,.section-grid .list-item small{overflow-wrap:anywhere}
+  #nav button{justify-content:center}
+  .nav-count{position:absolute;top:1px;right:2px;min-width:16px;height:16px;padding:0 4px;font-size:8px;box-shadow:0 0 0 2px #0c1117}
 }
