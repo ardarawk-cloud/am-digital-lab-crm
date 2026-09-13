@@ -1,13 +1,47 @@
-const SITE_VERSION='1.1.0';
+const SITE_VERSION='1.2.0';
 const jsonHeaders={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'strict-origin-when-cross-origin'};
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:jsonHeaders});}
 function primaryDB(env){return env.CRM_DB.getByName('amdl-primary');}
 
+function whatsappConfigured(env){
+  return Boolean(env.WHATSAPP_TOKEN&&env.WHATSAPP_PHONE_NUMBER_ID&&env.WHATSAPP_NOTIFY_TO&&env.WHATSAPP_TEMPLATE_NAME&&env.WHATSAPP_API_VERSION);
+}
+async function sendWhatsAppLeadNotification(env,lead){
+  if(!whatsappConfigured(env))return {ok:false,skipped:true,reason:'not_configured'};
+  const version=String(env.WHATSAPP_API_VERSION).replace(/[^a-zA-Z0-9.]/g,'');
+  const phoneId=String(env.WHATSAPP_PHONE_NUMBER_ID).replace(/[^0-9]/g,'');
+  const to=String(env.WHATSAPP_NOTIFY_TO).replace(/[^0-9]/g,'');
+  if(!version||!phoneId||!to)return {ok:false,skipped:true,reason:'invalid_config'};
+  const response=await fetch(`https://graph.facebook.com/${version}/${phoneId}/messages`,{
+    method:'POST',
+    headers:{'authorization':`Bearer ${env.WHATSAPP_TOKEN}`,'content-type':'application/json'},
+    body:JSON.stringify({
+      messaging_product:'whatsapp',
+      to,
+      type:'template',
+      template:{
+        name:String(env.WHATSAPP_TEMPLATE_NAME),
+        language:{code:String(env.WHATSAPP_TEMPLATE_LANG||'en_US')},
+        components:[{type:'body',parameters:[
+          {type:'text',text:String(lead.code||'-').slice(0,120)},
+          {type:'text',text:String(lead.name||'-').slice(0,120)},
+          {type:'text',text:String(lead.projectType||'-').slice(0,120)},
+          {type:'text',text:String(lead.budget||'Not specified').slice(0,120)},
+          {type:'text',text:String(lead.phone||lead.email||'-').slice(0,180)}
+        ]}]
+      }
+    })
+  });
+  const body=await response.text();
+  if(!response.ok)throw new Error(`WhatsApp API ${response.status}: ${body.slice(0,500)}`);
+  return {ok:true};
+}
+
 export default {
-  async fetch(request,env){
+  async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/healthz'){
-      try{const database=await primaryDB(env).health();return json({ok:Boolean(database),service:'am-digital-lab-public',version:SITE_VERSION,crm_database:Boolean(database)});}catch(err){console.error('CRM database health failed',err);return json({ok:false,service:'am-digital-lab-public',version:SITE_VERSION,crm_database:false},503);}
+      try{const database=await primaryDB(env).health();return json({ok:Boolean(database),service:'am-digital-lab-public',version:SITE_VERSION,crm_database:Boolean(database),whatsapp_notification_configured:whatsappConfigured(env)});}catch(err){console.error('CRM database health failed',err);return json({ok:false,service:'am-digital-lab-public',version:SITE_VERSION,crm_database:false,whatsapp_notification_configured:whatsappConfigured(env)},503);}
     }
 
     if(url.pathname==='/api/event'&&request.method==='POST'){
@@ -37,6 +71,13 @@ export default {
         const code=`AMD-L-${new Date().getFullYear()}-${String(id).padStart(3,'0')}`;
         await DB.run('UPDATE leads SET code=? WHERE id=?',[code,id]);
         await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Public website lead ${code}`,'lead',id]);
+        const notification=sendWhatsAppLeadNotification(env,{code,name,projectType,budget,phone,email}).then(async result=>{
+          if(result.ok)await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification sent for ${code}`,'lead',id]);
+        }).catch(async err=>{
+          console.error('WhatsApp lead notification failed',err);
+          try{await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification failed for ${code}`,'lead',id]);}catch{}
+        });
+        if(ctx?.waitUntil)ctx.waitUntil(notification);else await notification;
         return json({ok:true,id,code},201);
       }catch(err){console.error('Project inquiry database write failed',err);return json({error:'Project inquiry service is temporarily unavailable.'},502);}
     }
