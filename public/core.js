@@ -75,7 +75,7 @@ async function render(){
     if(state.page==='projects')return renderProjects();
     if(state.page==='quotations')return renderQuotations();
     if(state.page==='tasks')return renderTasks();
-    if(state.page==='changes')return renderChangeRequests();
+    if(state.page==='changes')return renderChanges();
     if(state.page==='qc')return renderQc();
     if(state.page==='finance')return renderFinance();
   }catch(e){$('#content').innerHTML=`<div class="card danger">${esc(e.message)}</div>`}
