@@ -1,7 +1,54 @@
-const SITE_VERSION='1.2.1';
+const SITE_VERSION='1.3.0';
 const jsonHeaders={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'strict-origin-when-cross-origin'};
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:jsonHeaders});}
 function primaryDB(env){return env.CRM_DB.getByName('amdl-primary');}
+
+function discordWebhookUrl(env){
+  const raw=String(env.DISCORD_WEBHOOK_URL||'').trim();
+  if(!raw)return '';
+  try{
+    const url=new URL(raw);
+    const hosts=new Set(['discord.com','ptb.discord.com','canary.discord.com']);
+    if(url.protocol!=='https:'||!hosts.has(url.hostname.toLowerCase()))return '';
+    if(!/^\/api(?:\/v[0-9]+)?\/webhooks\/[0-9]+\/[^/]+$/.test(url.pathname))return '';
+    url.search='';
+    url.hash='';
+    return url.toString();
+  }catch{return '';}
+}
+function discordConfigured(env){return Boolean(discordWebhookUrl(env));}
+function cleanDiscordText(value,fallback='-'){return String(value||fallback).trim().slice(0,1000)||fallback;}
+async function sendDiscordLeadNotification(env,lead){
+  const webhook=discordWebhookUrl(env);
+  if(!webhook)return {ok:false,skipped:true,reason:'not_configured'};
+  const contact=cleanDiscordText(lead.phone||lead.email);
+  const response=await fetch(webhook,{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({
+      username:'AM DIGITAL LAB Leads',
+      allowed_mentions:{parse:[]},
+      embeds:[{
+        title:'New Project Lead',
+        url:'https://am-digital-lab-crm.ardarawk.workers.dev',
+        color:5088255,
+        fields:[
+          {name:'Lead',value:cleanDiscordText(lead.code),inline:true},
+          {name:'Name',value:cleanDiscordText(lead.name),inline:true},
+          {name:'Project',value:cleanDiscordText(lead.projectType),inline:false},
+          {name:'Budget',value:cleanDiscordText(lead.budget,'Belum ditentukan'),inline:true},
+          {name:'Contact',value:contact,inline:true},
+          {name:'Company',value:cleanDiscordText(lead.company),inline:false}
+        ],
+        footer:{text:'AM DIGITAL LAB CRM · Open CRM for full details'},
+        timestamp:new Date().toISOString()
+      }]
+    })
+  });
+  const body=await response.text();
+  if(!response.ok)throw new Error(`Discord webhook ${response.status}: ${body.slice(0,260)}`);
+  return {ok:true,mode:'discord_webhook'};
+}
 
 function whatsappAccessToken(env){return String(env.WHATSAPP_ACCESS_TOKEN||env.WHATSAPP_TOKEN||'').trim();}
 function whatsappConfigured(env){
@@ -73,11 +120,31 @@ async function sendWhatsAppLeadNotification(env,lead){
   throw new Error(`WhatsApp text ${textResult.status}: ${textResult.body.slice(0,260)} | template ${templateResult.status}: ${templateResult.body.slice(0,260)}`);
 }
 
+async function sendLeadNotification(env,lead){
+  let discordError=null;
+  if(discordConfigured(env)){
+    try{return await sendDiscordLeadNotification(env,lead);}
+    catch(err){discordError=err;console.error('Discord lead notification failed',err);}
+  }
+  if(whatsappConfigured(env)){
+    try{
+      const result=await sendWhatsAppLeadNotification(env,lead);
+      if(result.ok)return {ok:true,mode:`whatsapp_${result.mode}`,fallbackFrom:discordError?'discord':null};
+      return result;
+    }catch(err){
+      if(discordError)throw new Error(`Discord: ${discordError.message} | WhatsApp: ${err.message}`);
+      throw err;
+    }
+  }
+  if(discordError)throw discordError;
+  return {ok:false,skipped:true,reason:'not_configured'};
+}
+
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/healthz'){
-      try{const database=await primaryDB(env).health();return json({ok:Boolean(database),service:'am-digital-lab-public',version:SITE_VERSION,crm_database:Boolean(database),whatsapp_notification_configured:whatsappConfigured(env)});}catch(err){console.error('CRM database health failed',err);return json({ok:false,service:'am-digital-lab-public',version:SITE_VERSION,crm_database:false,whatsapp_notification_configured:whatsappConfigured(env)},503);}
+      try{const database=await primaryDB(env).health();return json({ok:Boolean(database),service:'am-digital-lab-public',version:SITE_VERSION,crm_database:Boolean(database),discord_notification_configured:discordConfigured(env),whatsapp_notification_configured:whatsappConfigured(env),notification_primary:discordConfigured(env)?'discord':whatsappConfigured(env)?'whatsapp':'none'});}catch(err){console.error('CRM database health failed',err);return json({ok:false,service:'am-digital-lab-public',version:SITE_VERSION,crm_database:false,discord_notification_configured:discordConfigured(env),whatsapp_notification_configured:whatsappConfigured(env),notification_primary:discordConfigured(env)?'discord':whatsappConfigured(env)?'whatsapp':'none'},503);}
     }
 
     if(url.pathname==='/api/event'&&request.method==='POST'){
@@ -107,11 +174,12 @@ export default {
         const code=`AMD-L-${new Date().getFullYear()}-${String(id).padStart(3,'0')}`;
         await DB.run('UPDATE leads SET code=? WHERE id=?',[code,id]);
         await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Public website lead ${code}`,'lead',id]);
-        const notification=sendWhatsAppLeadNotification(env,{code,name,projectType,budget,phone,email}).then(async result=>{
-          if(result.ok)await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification sent (${result.mode}) for ${code}`,'lead',id]);
+        const notification=sendLeadNotification(env,{code,name,company,projectType,budget,target,phone,email}).then(async result=>{
+          if(result.ok)await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Lead notification sent (${result.mode}) for ${code}`,'lead',id]);
+          else if(result.skipped)await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Lead notification skipped (${result.reason}) for ${code}`,'lead',id]);
         }).catch(async err=>{
-          console.error('WhatsApp lead notification failed',err);
-          try{await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification failed for ${code}`,'lead',id]);}catch{}
+          console.error('Lead notification failed',err);
+          try{await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Lead notification failed for ${code}`,'lead',id]);}catch{}
         });
         if(ctx?.waitUntil)ctx.waitUntil(notification);else await notification;
         return json({ok:true,id,code},201);
