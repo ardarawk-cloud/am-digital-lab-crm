@@ -1,40 +1,76 @@
-const SITE_VERSION='1.2.0';
+const SITE_VERSION='1.2.1';
 const jsonHeaders={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'strict-origin-when-cross-origin'};
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:jsonHeaders});}
 function primaryDB(env){return env.CRM_DB.getByName('amdl-primary');}
 
+function whatsappAccessToken(env){return String(env.WHATSAPP_ACCESS_TOKEN||env.WHATSAPP_TOKEN||'').trim();}
 function whatsappConfigured(env){
-  return Boolean(env.WHATSAPP_TOKEN&&env.WHATSAPP_PHONE_NUMBER_ID&&env.WHATSAPP_NOTIFY_TO&&env.WHATSAPP_TEMPLATE_NAME&&env.WHATSAPP_API_VERSION);
+  return Boolean(whatsappAccessToken(env)&&env.WHATSAPP_PHONE_NUMBER_ID&&env.WHATSAPP_NOTIFY_TO);
+}
+function whatsappConfig(env){
+  const version=String(env.WHATSAPP_API_VERSION||'v23.0').replace(/[^a-zA-Z0-9.]/g,'');
+  const phoneId=String(env.WHATSAPP_PHONE_NUMBER_ID||'').replace(/[^0-9]/g,'');
+  const to=String(env.WHATSAPP_NOTIFY_TO||'').replace(/[^0-9]/g,'');
+  const token=whatsappAccessToken(env);
+  return {version,phoneId,to,token};
+}
+async function postWhatsApp(env,payload){
+  const {version,phoneId,token}=whatsappConfig(env);
+  const response=await fetch(`https://graph.facebook.com/${version}/${phoneId}/messages`,{
+    method:'POST',
+    headers:{'authorization':`Bearer ${token}`,'content-type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  const body=await response.text();
+  return {ok:response.ok,status:response.status,body};
 }
 async function sendWhatsAppLeadNotification(env,lead){
   if(!whatsappConfigured(env))return {ok:false,skipped:true,reason:'not_configured'};
-  const version=String(env.WHATSAPP_API_VERSION).replace(/[^a-zA-Z0-9.]/g,'');
-  const phoneId=String(env.WHATSAPP_PHONE_NUMBER_ID).replace(/[^0-9]/g,'');
-  const to=String(env.WHATSAPP_NOTIFY_TO).replace(/[^0-9]/g,'');
+  const {version,phoneId,to}=whatsappConfig(env);
   if(!version||!phoneId||!to)return {ok:false,skipped:true,reason:'invalid_config'};
-  const response=await fetch(`https://graph.facebook.com/${version}/${phoneId}/messages`,{
-    method:'POST',
-    headers:{'authorization':`Bearer ${env.WHATSAPP_TOKEN}`,'content-type':'application/json'},
-    body:JSON.stringify({
-      messaging_product:'whatsapp',
-      to,
-      type:'template',
-      template:{
-        name:String(env.WHATSAPP_TEMPLATE_NAME),
-        language:{code:String(env.WHATSAPP_TEMPLATE_LANG||'en_US')},
-        components:[{type:'body',parameters:[
-          {type:'text',text:String(lead.code||'-').slice(0,120)},
-          {type:'text',text:String(lead.name||'-').slice(0,120)},
-          {type:'text',text:String(lead.projectType||'-').slice(0,120)},
-          {type:'text',text:String(lead.budget||'Not specified').slice(0,120)},
-          {type:'text',text:String(lead.phone||lead.email||'-').slice(0,180)}
-        ]}]
-      }
-    })
+
+  const contact=String(lead.phone||lead.email||'-').trim()||'-';
+  const text=[
+    'AM DIGITAL LAB — NEW LEAD',
+    `Lead: ${lead.code||'-'}`,
+    `Nama: ${lead.name||'-'}`,
+    `Project: ${lead.projectType||'-'}`,
+    `Budget: ${lead.budget||'Belum ditentukan'}`,
+    `Kontak: ${contact}`,
+    '',
+    'Cek CRM untuk detail lengkap.'
+  ].join('\n').slice(0,4000);
+
+  const textResult=await postWhatsApp(env,{
+    messaging_product:'whatsapp',
+    recipient_type:'individual',
+    to,
+    type:'text',
+    text:{preview_url:false,body:text}
   });
-  const body=await response.text();
-  if(!response.ok)throw new Error(`WhatsApp API ${response.status}: ${body.slice(0,500)}`);
-  return {ok:true};
+  if(textResult.ok)return {ok:true,mode:'text'};
+
+  const templateName=String(env.WHATSAPP_TEMPLATE_NAME||'hello_world').trim();
+  const templateLang=String(env.WHATSAPP_TEMPLATE_LANG||'en_US').trim();
+  const template={name:templateName,language:{code:templateLang}};
+  if(env.WHATSAPP_TEMPLATE_NAME){
+    template.components=[{type:'body',parameters:[
+      {type:'text',text:String(lead.code||'-').slice(0,120)},
+      {type:'text',text:String(lead.name||'-').slice(0,120)},
+      {type:'text',text:String(lead.projectType||'-').slice(0,120)},
+      {type:'text',text:String(lead.budget||'Belum ditentukan').slice(0,120)},
+      {type:'text',text:contact.slice(0,180)}
+    ]}];
+  }
+  const templateResult=await postWhatsApp(env,{
+    messaging_product:'whatsapp',
+    to,
+    type:'template',
+    template
+  });
+  if(templateResult.ok)return {ok:true,mode:env.WHATSAPP_TEMPLATE_NAME?'custom_template':'hello_world_fallback'};
+
+  throw new Error(`WhatsApp text ${textResult.status}: ${textResult.body.slice(0,260)} | template ${templateResult.status}: ${templateResult.body.slice(0,260)}`);
 }
 
 export default {
@@ -72,7 +108,7 @@ export default {
         await DB.run('UPDATE leads SET code=? WHERE id=?',[code,id]);
         await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Public website lead ${code}`,'lead',id]);
         const notification=sendWhatsAppLeadNotification(env,{code,name,projectType,budget,phone,email}).then(async result=>{
-          if(result.ok)await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification sent for ${code}`,'lead',id]);
+          if(result.ok)await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification sent (${result.mode}) for ${code}`,'lead',id]);
         }).catch(async err=>{
           console.error('WhatsApp lead notification failed',err);
           try{await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`WhatsApp lead notification failed for ${code}`,'lead',id]);}catch{}
