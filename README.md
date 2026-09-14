@@ -71,6 +71,16 @@ admin@amdigital.local
 
 No production password is committed to this repository.
 
+### Public lead notification secret
+
+The public Worker prefers Discord and keeps WhatsApp as a fallback. Configure the Discord webhook only as a Cloudflare Worker secret:
+
+```text
+DISCORD_WEBHOOK_URL
+```
+
+Do not commit the webhook URL, access tokens, or other credentials. The public `/healthz` response reports only whether each notification channel is configured; it never returns secret values.
+
 ## Local development
 
 ```bash
