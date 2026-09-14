@@ -46,7 +46,7 @@ $('#logoutBtn').onclick=async()=>{clearInterval(leadBadgeTimer);await api('/api/
 $('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)navigate(b.dataset.page)});
 
 const pageMeta={
-  dashboard:['Dashboard','Kontrol operasional AM DIGITAL LAB.'],
+  dashboard:['Dashboard','Kontrol operasional NADMO STUDIO.'],
   leads:['Sales / Leads','Kelola pipeline dan calon client.'],
   clients:['Clients','Database client dan nilai relationship.'],
   projects:['Projects','Scope, status, progress, dan project health.'],

@@ -36,10 +36,10 @@ async function hasBlockingQc(DB,id){return (await scalar(DB.prepare(`SELECT COUN
 
 async function login(request,env){
   if(!env.AMDL_ADMIN_PASSWORD)return reply({error:'Admin password belum dikonfigurasi di Cloudflare Worker secret.'},503);
-  const d=await readBody(request);const email=String(env.AMDL_ADMIN_EMAIL||'admin@amdigital.local').toLowerCase();
+  const d=await readBody(request);const email=String(env.AMDL_ADMIN_EMAIL||'admin@nadmo.local').toLowerCase();
   if(String(d.email||'').toLowerCase()!==email||!safeEqual(d.password,env.AMDL_ADMIN_PASSWORD))return reply({error:'Email atau password salah.'},401);
   let user=await env.DB.prepare('SELECT id,name,email,role FROM users WHERE lower(email)=lower(?)').bind(email).first();
-  if(!user){await env.DB.prepare('INSERT INTO users (name,email,role) VALUES (?,?,?)').bind('AM DIGITAL LAB Owner',email,'OWNER').run();user=await env.DB.prepare('SELECT id,name,email,role FROM users WHERE lower(email)=lower(?)').bind(email).first();}
+  if(!user){await env.DB.prepare('INSERT INTO users (name,email,role) VALUES (?,?,?)').bind('NADMO STUDIO Owner',email,'OWNER').run();user=await env.DB.prepare('SELECT id,name,email,role FROM users WHERE lower(email)=lower(?)').bind(email).first();}
   const token=sessionToken(),expires=new Date(Date.now()+SESSION_DAYS*86400000).toISOString();
   await env.DB.batch([env.DB.prepare('DELETE FROM sessions WHERE expires_at<=?').bind(new Date().toISOString()),env.DB.prepare('INSERT INTO sessions (token,user_id,expires_at) VALUES (?,?,?)').bind(token,user.id,expires)]);
   return reply({ok:true,user,version:VERSION},200,{'Set-Cookie':`amdl_session=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DAYS*86400}`});

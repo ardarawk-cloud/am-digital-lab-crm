@@ -1,9 +1,9 @@
 {
-  "name": "am-digital-lab-crm",
-  "version": "0.3.0",
+  "name": "nadmo-studio-crm",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "AM DIGITAL LAB CRM on Cloudflare Workers + D1",
+  "description": "NADMO STUDIO CRM on Cloudflare Workers + SQLite Durable Object",
   "scripts": {
     "build": "cat worker-parts/*.part > worker.js",
     "dev": "npm run build && wrangler dev",

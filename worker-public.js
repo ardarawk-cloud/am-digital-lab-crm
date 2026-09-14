@@ -1,4 +1,4 @@
-const SITE_VERSION='1.3.0';
+const SITE_VERSION='2.0.0';
 const jsonHeaders={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'strict-origin-when-cross-origin'};
 function json(data,status=200){return new Response(JSON.stringify(data),{status,headers:jsonHeaders});}
 function primaryDB(env){return env.CRM_DB.getByName('amdl-primary');}
@@ -26,7 +26,7 @@ async function sendDiscordLeadNotification(env,lead){
     method:'POST',
     headers:{'content-type':'application/json'},
     body:JSON.stringify({
-      username:'AM DIGITAL LAB Leads',
+      username:'NADMO STUDIO Leads',
       allowed_mentions:{parse:[]},
       embeds:[{
         title:'New Project Lead',
@@ -40,7 +40,7 @@ async function sendDiscordLeadNotification(env,lead){
           {name:'Contact',value:contact,inline:true},
           {name:'Company',value:cleanDiscordText(lead.company),inline:false}
         ],
-        footer:{text:'AM DIGITAL LAB CRM · Open CRM for full details'},
+        footer:{text:'NADMO STUDIO CRM · Open CRM for full details'},
         timestamp:new Date().toISOString()
       }]
     })
@@ -78,7 +78,7 @@ async function sendWhatsAppLeadNotification(env,lead){
 
   const contact=String(lead.phone||lead.email||'-').trim()||'-';
   const text=[
-    'AM DIGITAL LAB — NEW LEAD',
+    'NADMO STUDIO — NEW LEAD',
     `Lead: ${lead.code||'-'}`,
     `Nama: ${lead.name||'-'}`,
     `Project: ${lead.projectType||'-'}`,
@@ -171,7 +171,7 @@ export default {
         const notes=['Public website inquiry',company?`Company: ${company}`:'',target?`Target: ${target}`:''].filter(Boolean).join(' · ');
         const result=await DB.run(`INSERT INTO leads (code,name,company,phone,email,source,project_type,project_description,budget_range,target_launch,status,potential_value,assigned_to,last_contact,next_followup,notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[tempCode,name,company,phone,email,'Public Website',projectType,description,budget,target,'NEW',0,'','','',notes]);
         const id=Number(result?.meta?.last_row_id||0);if(!id)throw new Error('Lead insert did not return an id');
-        const code=`AMD-L-${new Date().getFullYear()}-${String(id).padStart(3,'0')}`;
+        const code=`NAD-L-${new Date().getFullYear()}-${String(id).padStart(3,'0')}`;
         await DB.run('UPDATE leads SET code=? WHERE id=?',[code,id]);
         await DB.run('INSERT INTO activity_logs (user_id,action,object_type,object_id) VALUES (?,?,?,?)',[null,`Public website lead ${code}`,'lead',id]);
         const notification=sendLeadNotification(env,{code,name,company,projectType,budget,target,phone,email}).then(async result=>{

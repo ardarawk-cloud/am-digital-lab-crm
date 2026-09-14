@@ -1,10 +1,10 @@
-# AM DIGITAL LAB CRM
+# NADMO STUDIO CRM
 
-Internal CRM and project-operations dashboard for **AM DIGITAL LAB**.
+Internal CRM and project-operations dashboard for **NADMO STUDIO**.
 
 ## Current version
 
-**v0.3.0 — Cloudflare Native**
+**v0.4.0 — NADMO Rebrand / Cloudflare Native**
 
 Production architecture:
 
@@ -17,6 +17,8 @@ Cloudflare D1 (binding: DB)
 ```
 
 The previous Node + local SQLite / Railway path is retired from `main`.
+
+Legacy infrastructure identifiers such as the repository, Worker names, database binding, cookies, and existing secret keys remain unchanged during the `nadmo.id` domain transition to preserve production continuity.
 
 ## Active modules
 
@@ -66,7 +68,7 @@ AMDL_ADMIN_PASSWORD
 Admin email defaults to:
 
 ```text
-admin@amdigital.local
+admin@nadmo.local
 ```
 
 No production password is committed to this repository.
@@ -96,4 +98,4 @@ npm run dev
 GET /healthz
 ```
 
-Expected version marker: `0.3.0-cloudflare`.
+Expected version marker: `0.4.0-nadmo`.
