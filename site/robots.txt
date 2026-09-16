@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://am-digital-lab.ardarawk.workers.dev/sitemap.xml
+Sitemap: https://nadmo.id/sitemap.xml
