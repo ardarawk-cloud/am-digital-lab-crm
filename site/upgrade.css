@@ -9,3 +9,23 @@
 
 @media(max-width:760px){.brand-mark{width:56px!important;height:56px!important;border-radius:17px!important}.brand-copy b{font-size:15px!important}.brand-copy small{font-size:10px!important}.work-grid{grid-template-columns:1fr}.work-card{min-height:220px;padding:24px}.work-card h3{font-size:22px;margin-top:30px}.price-card strong{font-size:24px}.showcase-card[data-kind="web"] .showcase-preview:after{width:94%;height:150px;border-radius:10px}.showcase-card[data-kind="apk"] .showcase-preview:after{width:82px;height:158px;border-width:3px;border-radius:18px}.showcase-preview{height:188px!important;padding:12px!important}}
 @media(max-width:390px){.showcase-card[data-kind="web"] .showcase-preview:after{height:134px}.showcase-card[data-kind="apk"] .showcase-preview:after{width:76px;height:142px}.showcase-preview{height:168px!important}}
+
+/* CRM preview focus: enlarge the real login screen inside the wide capture. */
+.showcase-card:nth-child(2) .showcase-preview:after{
+  background-size:165% auto!important;
+  background-position:center 50%!important
+}
+@media(max-width:760px){
+  .showcase-card:nth-child(2) .showcase-preview:after{
+    width:96%;
+    height:158px;
+    background-size:175% auto!important;
+    background-position:center 50%!important
+  }
+}
+@media(max-width:390px){
+  .showcase-card:nth-child(2) .showcase-preview:after{
+    height:146px;
+    background-size:185% auto!important
+  }
+}
