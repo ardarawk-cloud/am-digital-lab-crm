@@ -1,0 +1,37 @@
+name: Capture Portfolio Previews
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/capture-portfolio.sh"
+      - "site/app.js"
+      - "site/upgrade.css"
+      - ".github/workflows/capture-portfolio.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Capture real project previews
+        run: bash scripts/capture-portfolio.sh
+
+      - name: Commit refreshed portfolio images
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/portfolio/*.png
+          if git diff --cached --quiet; then
+            echo "Portfolio previews already current."
+            exit 0
+          fi
+          git commit -m "build: refresh real portfolio previews"
+          git push
