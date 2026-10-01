@@ -12,6 +12,15 @@ document.querySelectorAll('.price-card').forEach(card=>{const row=pricingValues.
 const budgetSelect=document.querySelector('select[name="budget_range"]');
 if(budgetSelect){const labels={'Under Rp5M':'Under Rp5.000.000','Rp5M–10M':'Rp5.000.000–Rp10.000.000','Rp10M–20M':'Rp10.000.000–Rp20.000.000','Rp20M–50M':'Rp20.000.000–Rp50.000.000','Rp50M+':'Rp50.000.000+'};[...budgetSelect.options].forEach(o=>{if(labels[o.textContent])o.textContent=labels[o.textContent]})}
 
+const projectTypeSelect=document.querySelector('select[name="project_type"]');
+document.querySelectorAll('[data-project-type]').forEach(link=>link.addEventListener('click',()=>{
+  const value=link.dataset.projectType||'';
+  if(projectTypeSelect&&value){
+    const option=[...projectTypeSelect.options].find(o=>o.textContent.trim()===value);
+    if(option)projectTypeSelect.value=option.value;
+  }
+}));
+
 const projects=[
 {type:'web',label:'ENTERPRISE PLATFORM',status:'ACTIVE',name:'ACC OS X',desc:'Enterprise operating system for production workflows, channels, AI-assisted operations, publishing and connected workspaces.',stack:['Cloudflare','AI Workflow','Dashboard']},
 {type:'web',label:'BUSINESS SYSTEM',status:'LIVE',name:'NADMO STUDIO CRM',desc:'Cloud-native CRM covering leads, clients, projects, quotations, invoices, tasks, change requests and QC.',stack:['Workers','SQLite','CRM']},
