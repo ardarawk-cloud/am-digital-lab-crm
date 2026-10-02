@@ -177,3 +177,27 @@
   .personal-cta{align-items:stretch;flex-direction:column}
   .personal-cta .btn{width:100%}
 }
+
+
+/* Personal/business separation polish */
+.service-subhead{display:grid;grid-template-columns:auto 1fr;column-gap:18px;row-gap:4px;align-items:end;margin:34px 0 18px;padding-top:28px;border-top:1px solid #202b36}
+.service-subhead .kicker{grid-row:1/3;align-self:start;margin-top:5px}
+.service-subhead h3{margin:0;font-size:27px;letter-spacing:-.035em}
+.service-subhead p{margin:0;color:#8796a8;font-size:11px;line-height:1.6}
+.business-service-grid .legal-service-card{grid-column:1/-1}
+
+.personal-sample{padding:0;overflow:hidden}
+.personal-sample .sample-shot{display:block;margin:0;height:190px;overflow:hidden;border-bottom:1px solid #293847;background:#080e14}
+.personal-sample .sample-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .35s ease}
+.personal-sample:hover .sample-shot img{transform:scale(1.025)}
+.personal-sample>.sample-tag,.personal-sample>h3,.personal-sample>p,.personal-sample>a:not(.sample-shot){margin-left:24px;margin-right:24px}
+.personal-sample>.sample-tag{display:block;margin-top:20px}
+.personal-sample>h3{margin-top:18px}
+.personal-sample>p{min-height:82px}
+.personal-sample>a:not(.sample-shot){margin-bottom:24px}
+
+@media(max-width:760px){
+  .service-subhead{grid-template-columns:1fr;gap:7px}
+  .service-subhead .kicker{grid-row:auto}
+  .personal-sample .sample-shot{height:170px}
+}
