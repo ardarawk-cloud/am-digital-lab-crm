@@ -67,7 +67,10 @@ shot ai-mashup 430 900 http://127.0.0.1:8113/apps/ai-mashup-bootleg-studio/
 # CRM is already live; capture the real production login UI rather than a fabricated mockup.
 shot amdl-crm 1440 900 https://am-digital-lab-crm.ardarawk.workers.dev/
 shot brush-by-yuda 1440 900 https://brushbyyuda.nadmo.id/
+shot arda-moron 1440 900 https://ardamoron.nadmo.id/
+shot bbya 1440 900 https://bbya.nadmo.id/
+shot dwp 1440 900 https://dwp.nadmo.id/
 
-for f in acc-os-x amdl-crm zuzu-family-house am-studio-music oracly ai-mashup brush-by-yuda; do
+for f in acc-os-x amdl-crm zuzu-family-house am-studio-music oracly ai-mashup brush-by-yuda arda-moron bbya dwp; do
   test -s "$OUT/$f.png"
 done
