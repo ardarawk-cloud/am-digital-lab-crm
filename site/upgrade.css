@@ -97,3 +97,83 @@
   .legal-cta{align-items:stretch;flex-direction:column}
   .legal-cta .btn{width:100%}
 }
+
+
+/* Personal vs Business lanes */
+.service-lanes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:-8px 0 22px}
+.service-lane{display:grid;gap:7px;padding:22px 24px;border-radius:18px;text-decoration:none;border:1px solid #293746;background:#101820;transition:.2s transform,.2s border-color}
+.service-lane:hover{transform:translateY(-2px)}
+.service-lane span{font-size:9px;font-weight:900;letter-spacing:.15em}
+.service-lane b{font-size:19px;color:#eff5fb}
+.service-lane small{font-size:11px;line-height:1.6;color:#8f9dad}
+.service-lane.personal{border-color:#2f4d6a;background:linear-gradient(135deg,#101a25,#0e151d)}
+.service-lane.personal span{color:#77baff}
+.service-lane.business{border-color:#4a3b25;background:linear-gradient(135deg,#171713,#11171d)}
+.service-lane.business span{color:#ffc463}
+
+.personal-service-card{grid-column:1/-1;min-height:0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:28px;align-items:center;padding:28px 30px;border-color:#315270;background:linear-gradient(120deg,#111c27,#10161d)}
+.personal-service-card .service-no{grid-row:1/4;align-self:start;color:#77baff}
+.personal-service-card h3{margin:0 0 8px;font-size:25px}
+.personal-service-card p{margin:0;max-width:800px}
+.personal-service-card .chips{margin-top:14px}
+
+.personal-branding-section{position:relative;overflow:hidden;background:radial-gradient(circle at 15% 10%,rgba(77,163,255,.12),transparent 30%),linear-gradient(180deg,#0b1118,#0d131a);border-top:1px solid #1d2d3e;border-bottom:1px solid #1d2d3e}
+.personal-head{display:grid;grid-template-columns:1.25fr .75fr;gap:48px;align-items:end;margin-bottom:42px}
+.personal-head h2{font-size:clamp(38px,5vw,66px);line-height:1.02;letter-spacing:-.05em;margin:12px 0 14px}
+.personal-head h2 em{font-style:normal;color:#77baff}
+.personal-head p{max-width:720px;color:#9eabb9;line-height:1.78;margin:0}
+.personal-promo{justify-self:end;width:min(100%,360px);padding:24px 26px;border:1px solid rgba(98,174,255,.35);border-radius:22px;background:linear-gradient(145deg,rgba(77,163,255,.15),rgba(77,163,255,.04));box-shadow:0 24px 70px rgba(0,0,0,.24)}
+.personal-promo span{display:block;color:#82c0ff;font-size:10px;font-weight:900;letter-spacing:.14em}
+.personal-promo strong{display:block;font-size:34px;letter-spacing:-.04em;margin:7px 0 4px}
+.personal-promo small{color:#aec0d2;font-size:11px;line-height:1.5}
+
+.personal-package-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.personal-package{position:relative;min-height:350px;padding:26px;border-radius:22px;border:1px solid #293848;background:linear-gradient(155deg,#121a23,#0d141b)}
+.personal-package.featured{border-color:#4678a6;background:linear-gradient(155deg,#122235,#11171d);box-shadow:0 20px 55px rgba(77,163,255,.12)}
+.personal-package>span:not(.favorite-badge){display:block;color:#77baff;font-size:9px;font-weight:900;letter-spacing:.15em}
+.personal-package h3{font-size:24px;margin:25px 0 5px}
+.personal-package>strong{display:block;color:#8bc6ff;font-size:29px;letter-spacing:-.04em;margin-bottom:26px}
+.personal-package ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.personal-package li{position:relative;padding-left:24px;color:#b4bfcb;font-size:12px;line-height:1.5}
+.personal-package li:before{content:"✓";position:absolute;left:0;top:0;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:#2b6da5;color:#fff;font-size:10px;font-weight:900}
+
+.personal-samples-head{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:end;margin:58px 0 22px}
+.personal-samples-head h3{font-size:30px;margin:9px 0 0}
+.personal-samples-head p{margin:0;color:#8f9dad;line-height:1.7;font-size:12px}
+.personal-sample-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.personal-sample{padding:24px;border-radius:20px;border:1px solid #293847;background:linear-gradient(145deg,#111923,#0e151d)}
+.personal-sample .sample-tag{font-size:8px;font-weight:900;letter-spacing:.12em;color:#77baff}
+.personal-sample h3{font-size:24px;margin:24px 0 9px}
+.personal-sample p{color:#91a0b1;font-size:12px;line-height:1.7;min-height:82px}
+.personal-sample a{display:inline-flex;margin-top:12px;text-decoration:none;color:#d9ebff;font-size:10px;font-weight:900;letter-spacing:.05em}
+.personal-sample a:hover{color:#77baff}
+
+.personal-cta{display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:18px;padding:25px 28px;border-radius:20px;background:linear-gradient(100deg,#172333,#111a23);border:1px solid rgba(77,163,255,.23)}
+.personal-cta>div{display:grid;gap:5px}
+.personal-cta b{font-size:17px}
+.personal-cta span{color:#9da9b6;font-size:11px}
+.personal-cta .btn{white-space:nowrap}
+
+@media(max-width:1050px){
+  .service-lanes{grid-template-columns:1fr}
+  .personal-service-card{grid-template-columns:auto 1fr}
+  .personal-service-card .service-link{grid-column:2;grid-row:auto;justify-self:start;margin-top:2px}
+  .personal-head{grid-template-columns:1fr;gap:24px}
+  .personal-promo{justify-self:start}
+  .personal-package-grid{grid-template-columns:1fr 1fr}
+  .personal-package-grid .personal-package:last-child{grid-column:1/-1}
+  .personal-sample-grid{grid-template-columns:1fr}
+  .personal-samples-head{grid-template-columns:1fr;gap:16px}
+}
+@media(max-width:760px){
+  .personal-service-card{display:block;padding:24px}
+  .personal-service-card h3{margin:22px 0 10px}
+  .personal-service-card .chips{margin-bottom:16px}
+  .personal-head h2{font-size:40px}
+  .personal-package-grid{grid-template-columns:1fr}
+  .personal-package-grid .personal-package:last-child{grid-column:auto}
+  .personal-package{min-height:0}
+  .personal-sample p{min-height:0}
+  .personal-cta{align-items:stretch;flex-direction:column}
+  .personal-cta .btn{width:100%}
+}
