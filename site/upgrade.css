@@ -187,9 +187,9 @@
 .business-service-grid .legal-service-card{grid-column:1/-1}
 
 .personal-sample{padding:0;overflow:hidden}
-.personal-sample .sample-shot{display:block;margin:0;height:190px;overflow:hidden;border-bottom:1px solid #293847;background:#080e14}
+.personal-sample .sample-shot{display:block;margin:0;height:120px;overflow:hidden;border-bottom:1px solid #293847;background:#080e14}
 .personal-sample .sample-shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .35s ease}
-.personal-sample:hover .sample-shot img{transform:scale(1.025)}
+.personal-sample:hover .sample-shot img{transform:scale(1.01)}
 .personal-sample>.sample-tag,.personal-sample>h3,.personal-sample>p,.personal-sample>a:not(.sample-shot){margin-left:24px;margin-right:24px}
 .personal-sample>.sample-tag{display:block;margin-top:20px}
 .personal-sample>h3{margin-top:18px}
@@ -199,7 +199,7 @@
 @media(max-width:760px){
   .service-subhead{grid-template-columns:1fr;gap:7px}
   .service-subhead .kicker{grid-row:auto}
-  .personal-sample .sample-shot{height:170px}
+  .personal-sample .sample-shot{height:96px}
 }
 
 
