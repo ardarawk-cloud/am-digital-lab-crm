@@ -297,3 +297,9 @@
   .ecosystem-note{align-items:stretch;flex-direction:column}
   .ecosystem-note .btn{width:100%}
 }
+
+
+/* Hide internal build showcase */
+.portfolio-v2{display:none!important}
+.ecosystem-card.business-only{cursor:default}
+.ecosystem-card.business-only:hover{transform:none;border-color:#293745;box-shadow:none}
