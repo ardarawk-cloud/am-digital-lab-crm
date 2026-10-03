@@ -303,3 +303,54 @@
 .portfolio-v2{display:none!important}
 .ecosystem-card.business-only{cursor:default}
 .ecosystem-card.business-only:hover{transform:none;border-color:#293745;box-shadow:none}
+
+
+/* Featured businesses autoplay slider */
+.business-slider{position:relative;margin-top:8px}
+.business-slider-viewport{overflow:hidden;border-radius:26px}
+.business-slider-track{display:flex;transition:transform .65s cubic-bezier(.22,.72,.2,1);will-change:transform}
+.business-slide{position:relative;flex:0 0 100%;min-height:390px;padding:46px 50px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:40px;border:1px solid #2b3b4b;border-radius:26px;background:
+radial-gradient(circle at 82% 22%,rgba(71,156,255,.17),transparent 30%),
+radial-gradient(circle at 12% 90%,rgba(255,188,79,.08),transparent 28%),
+linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;overflow:hidden}
+.business-slide:before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(255,255,255,.025),transparent 30%);pointer-events:none}
+.business-slide-copy{position:relative;z-index:1;max-width:720px}
+.business-slide-type{display:inline-flex;align-items:center;padding:7px 10px;border:1px solid rgba(107,183,255,.27);border-radius:999px;color:#8fc8ff;font-size:9px;font-weight:900;letter-spacing:.14em}
+.business-slide h3{margin:28px 0 14px;font-size:clamp(44px,7vw,78px);line-height:.94;letter-spacing:-.055em}
+.business-slide p{max-width:650px;margin:0;color:#a4b2c1;font-size:14px;line-height:1.75}
+.business-slide b{display:inline-flex;margin-top:32px;color:#e8f4ff;font-size:11px;letter-spacing:.05em}
+.business-slide-muted{color:#718091!important;font-weight:800}
+.business-slide-mark{position:relative;z-index:1;width:180px;height:180px;border-radius:36px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.09);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.015));box-shadow:inset 0 1px rgba(255,255,255,.07),0 30px 80px rgba(0,0,0,.28);font-size:58px;font-weight:950;letter-spacing:-.06em;color:#edf6ff}
+.business-slide[href]:hover .business-slide-mark{transform:scale(1.025)}
+.business-slide-mark{transition:transform .25s ease}
+
+.business-slider-controls{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:18px}
+.business-slider-dots{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.business-slider-dot{width:8px;height:8px;border:0;border-radius:999px;background:#344251;padding:0;cursor:pointer;transition:.25s width,.25s background}
+.business-slider-dot.is-active{width:28px;background:#77baff}
+.business-slider-buttons{display:flex;gap:8px}
+.business-slider-btn{width:42px;height:42px;border-radius:50%;border:1px solid #334454;background:#101821;color:#eef6ff;cursor:pointer;font-size:17px;transition:.2s background,.2s border-color,.2s transform}
+.business-slider-btn:hover{background:#162331;border-color:#4b6680;transform:translateY(-1px)}
+.business-slider-progress{height:2px;margin-top:14px;background:#1b2732;overflow:hidden;border-radius:999px}
+.business-slider-progress span{display:block;width:0;height:100%;background:#77baff}
+.business-slider.is-playing .business-slider-progress span{animation:businessSliderProgress 4.8s linear forwards}
+@keyframes businessSliderProgress{from{width:0}to{width:100%}}
+
+@media(max-width:900px){
+  .business-slide{min-height:350px;padding:38px;grid-template-columns:1fr}
+  .business-slide-mark{position:absolute;right:26px;bottom:24px;width:110px;height:110px;border-radius:26px;font-size:36px;opacity:.46}
+  .business-slide-copy{padding-right:50px}
+}
+@media(max-width:620px){
+  .business-slide{min-height:390px;padding:30px 26px}
+  .business-slide h3{font-size:45px}
+  .business-slide p{font-size:12px;max-width:92%}
+  .business-slide-copy{padding-right:0}
+  .business-slide-mark{right:20px;bottom:20px;width:86px;height:86px;font-size:28px}
+  .business-slider-controls{align-items:flex-end}
+  .business-slider-dots{max-width:70%}
+}
+@media(prefers-reduced-motion:reduce){
+  .business-slider-track{transition:none}
+  .business-slider-progress span{animation:none!important}
+}
