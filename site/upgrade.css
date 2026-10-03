@@ -260,3 +260,40 @@
   .checkout-product{min-height:0}
   .checkout-summary>div{grid-template-columns:1fr;gap:6px}
 }
+
+
+/* NADMO Ecosystem Hub */
+.ecosystem-section{position:relative;background:radial-gradient(circle at 12% 0,rgba(77,163,255,.10),transparent 30%),linear-gradient(180deg,#0a1118,#0b1016);border-top:1px solid #1d2935;border-bottom:1px solid #1d2935}
+.ecosystem-head{margin-bottom:40px}
+.ecosystem-head h2{max-width:780px}
+.ecosystem-group{margin-top:28px}
+.ecosystem-group+.ecosystem-group{margin-top:46px;padding-top:38px;border-top:1px solid #1f2b36}
+.ecosystem-group-head{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:end;margin-bottom:18px}
+.ecosystem-group-head>span{font-size:9px;font-weight:900;letter-spacing:.15em;color:#77baff}
+.ecosystem-group-head h3{margin:0;font-size:24px;letter-spacing:-.03em}
+.ecosystem-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ecosystem-card{position:relative;display:flex;min-height:260px;flex-direction:column;padding:24px;border-radius:20px;border:1px solid #293745;background:linear-gradient(150deg,#111923,#0d141b);text-decoration:none;color:#eef5fb;overflow:hidden;transition:.2s transform,.2s border-color,.2s box-shadow}
+.ecosystem-card:after{content:"";position:absolute;right:-42px;bottom:-58px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(77,163,255,.12),transparent 70%);pointer-events:none}
+.ecosystem-card:hover{transform:translateY(-3px);border-color:#466783;box-shadow:0 22px 55px rgba(0,0,0,.22)}
+.ecosystem-card.venture{background:linear-gradient(150deg,#121a23,#0c141b)}
+.ecosystem-card.person{background:linear-gradient(150deg,#131820,#10131a)}
+.ecosystem-type{font-size:8px;font-weight:900;letter-spacing:.14em;color:#77baff}
+.ecosystem-card h3{font-size:25px;line-height:1.05;margin:34px 0 12px;letter-spacing:-.035em}
+.ecosystem-card p{margin:0;color:#8f9dad;font-size:11px;line-height:1.7}
+.ecosystem-card b{margin-top:auto;padding-top:28px;color:#d9ebff;font-size:10px;letter-spacing:.04em}
+.ecosystem-note{display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:32px;padding:24px 26px;border-radius:18px;border:1px solid #2c3d4d;background:linear-gradient(100deg,#111b25,#10161d)}
+.ecosystem-note>div{display:grid;gap:5px}
+.ecosystem-note b{font-size:16px}
+.ecosystem-note span{color:#8f9dad;font-size:11px;line-height:1.6}
+.ecosystem-note .btn{white-space:nowrap}
+
+@media(max-width:1100px){
+  .ecosystem-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .ecosystem-group-head{grid-template-columns:1fr;gap:7px}
+  .ecosystem-grid{grid-template-columns:1fr}
+  .ecosystem-card{min-height:220px}
+  .ecosystem-note{align-items:stretch;flex-direction:column}
+  .ecosystem-note .btn{width:100%}
+}
