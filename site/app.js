@@ -18,6 +18,89 @@ document.querySelectorAll('[data-project-type]').forEach(link=>link.addEventList
   }
 }));
 
+function initBusinessSlider(){
+  const slider=document.getElementById('businessSlider');
+  if(!slider)return;
+  const trackEl=slider.querySelector('.business-slider-track');
+  const slides=[...slider.querySelectorAll('.business-slide')];
+  const dotsWrap=slider.querySelector('.business-slider-dots');
+  const prev=slider.querySelector('.business-slider-btn.prev');
+  const next=slider.querySelector('.business-slider-btn.next');
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if(!trackEl||slides.length<2)return;
+
+  let index=0;
+  let timer=null;
+  let touchStartX=null;
+  const interval=4800;
+
+  slides.forEach((slide,i)=>{
+    const dot=document.createElement('button');
+    dot.type='button';
+    dot.className='business-slider-dot'+(i===0?' is-active':'');
+    dot.setAttribute('aria-label','Show '+(slide.dataset.brand||('business '+(i+1))));
+    dot.addEventListener('click',()=>go(i,true));
+    dotsWrap?.appendChild(dot);
+  });
+  const dots=[...slider.querySelectorAll('.business-slider-dot')];
+
+  function restartProgress(){
+    slider.classList.remove('is-playing');
+    void slider.offsetWidth;
+    if(!reduced)slider.classList.add('is-playing');
+  }
+
+  function render(){
+    trackEl.style.transform='translateX('+(-index*100)+'%)';
+    slides.forEach((s,i)=>s.classList.toggle('is-active',i===index));
+    dots.forEach((d,i)=>d.classList.toggle('is-active',i===index));
+    restartProgress();
+  }
+
+  function stop(){
+    if(timer){clearInterval(timer);timer=null}
+    slider.classList.remove('is-playing');
+  }
+
+  function start(){
+    stop();
+    if(reduced)return;
+    restartProgress();
+    timer=setInterval(()=>go(index+1,false),interval);
+  }
+
+  function go(nextIndex,userAction){
+    index=(nextIndex+slides.length)%slides.length;
+    render();
+    if(userAction)start();
+    track('featured_business_slide',slides[index]?.dataset.brand||'featured-business');
+  }
+
+  prev?.addEventListener('click',()=>go(index-1,true));
+  next?.addEventListener('click',()=>go(index+1,true));
+  slider.addEventListener('mouseenter',stop);
+  slider.addEventListener('mouseleave',start);
+  slider.addEventListener('focusin',stop);
+  slider.addEventListener('focusout',e=>{if(!slider.contains(e.relatedTarget))start()});
+  slider.addEventListener('touchstart',e=>{touchStartX=e.touches?.[0]?.clientX??null},{passive:true});
+  slider.addEventListener('touchend',e=>{
+    if(touchStartX===null)return;
+    const endX=e.changedTouches?.[0]?.clientX??touchStartX;
+    const delta=endX-touchStartX;
+    touchStartX=null;
+    if(Math.abs(delta)>45)go(index+(delta<0?1:-1),true);
+  },{passive:true});
+  slider.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'){e.preventDefault();go(index-1,true)}
+    if(e.key==='ArrowRight'){e.preventDefault();go(index+1,true)}
+  });
+
+  render();
+  start();
+}
+
+initBusinessSlider();
+
 const trust=document.createElement('section');trust.className='section trust-v2';trust.innerHTML=`<div class="container"><div class="section-head"><div><span class="kicker">WORKING STANDARD</span><h2>Built with business rules, not random revisions.</h2></div><p>Every project moves through a clear scope, milestone, QC and deployment flow.</p></div><div class="trust-cards"><div class="trust-card"><b>Scope before build</b><p>Requirements and priorities are locked before development starts.</p></div><div class="trust-card"><b>Milestone payment</b><p>Standard structure: 50% DP, 30% development milestone, 20% before handover.</p></div><div class="trust-card"><b>QC before production</b><p>Critical issues block deployment until they are resolved and verified.</p></div><div class="trust-card"><b>30-day bug warranty</b><p>Post-launch bug-fix warranty applies to the approved delivered scope.</p></div></div></div>`;document.getElementById('about')?.parentNode.insertBefore(trust,document.getElementById('about'));
 
 const faq=document.createElement('section');faq.className='section';faq.id='faq';faq.innerHTML=`<div class="container faq-grid"><div><span class="kicker">FAQ</span><h2>Before we start.</h2><p class="work-intro">Common questions before a project enters discovery and quotation.</p></div><div class="faq-list"><details><summary>Can you continue or repair an existing website/app?</summary><p>Yes. Existing products can be audited, repaired, modernized or extended after the current source and scope are reviewed.</p></details><details><summary>Can a project start small first?</summary><p>Yes. We can define an MVP or Phase 1 first, then add automation, AI, analytics or scaling features later.</p></details><details><summary>Are hosting, domain and third-party fees included?</summary><p>Only when stated in the quotation. Provider costs, API usage, payment gateway and similar third-party fees are normally quoted separately.</p></details><details><summary>What happens if features change after scope approval?</summary><p>New features become a documented Change Request with separate impact on price and timeline.</p></details><details><summary>Do you provide maintenance after launch?</summary><p>Yes. Monthly maintenance, hosting management, monitoring and feature upgrades can continue after handover.</p></details></div></div>`;document.getElementById('start')?.parentNode.insertBefore(faq,document.getElementById('start'));
@@ -36,4 +119,4 @@ document.querySelectorAll('a.btn,a.nav-cta').forEach(a=>a.addEventListener('clic
 const form=document.getElementById('projectForm'),statusEl=document.getElementById('formStatus'),submitBtn=document.getElementById('submitBtn');
 form?.addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form).entries());if(!data.name||(!data.email&&!data.phone)){statusEl.textContent='Please enter your name and at least an email or WhatsApp number.';statusEl.className='error';return}submitBtn.disabled=true;submitBtn.textContent='Sending...';statusEl.textContent='Sending your project inquiry to NADMO STUDIO...';statusEl.className='';try{const res=await fetch('/api/start-project',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(data)});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||'Unable to send inquiry.');form.reset();statusEl.textContent=`Inquiry received · ${body.code||'AMDL'}. We can now review it from our internal project pipeline.`;statusEl.className='success';track('lead_submit',body.code||'success')}catch(err){statusEl.textContent=err.message||'Something went wrong. Please try again.';statusEl.className='error'}finally{submitBtn.disabled=false;submitBtn.textContent='Send Project Inquiry'}});
 
-const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('in-view')})},{threshold:.08});document.querySelectorAll('.service-card,.solution-grid article,.price-card,.process-grid div,.trust-card,.ecosystem-card').forEach(el=>observer.observe(el));
+const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('in-view')})},{threshold:.08});document.querySelectorAll('.service-card,.solution-grid article,.price-card,.process-grid div,.trust-card,.business-slide').forEach(el=>observer.observe(el));
