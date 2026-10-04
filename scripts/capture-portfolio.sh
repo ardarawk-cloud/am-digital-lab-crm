@@ -24,7 +24,8 @@ shot(){
 shot arda-moron 1440 900 https://ardamoron.nadmo.id/
 shot bbya 1440 900 https://bbya.nadmo.id/
 shot dwp 1440 900 https://dwp.nadmo.id/
+shot saixko 1440 900 https://saixko.nadmo.id/
 
-for f in arda-moron bbya dwp; do
+for f in arda-moron bbya dwp saixko; do
   test -s "$OUT/$f.png"
 done
