@@ -309,7 +309,7 @@
 .business-slider{position:relative;margin-top:8px}
 .business-slider-viewport{overflow:hidden;border-radius:26px}
 .business-slider-track{display:flex;transition:transform .65s cubic-bezier(.22,.72,.2,1);will-change:transform}
-.business-slide{position:relative;flex:0 0 100%;min-height:390px;padding:46px 50px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:40px;border:1px solid #2b3b4b;border-radius:26px;background:
+.business-slide{position:relative;flex:0 0 100%;min-height:390px;padding:38px 40px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(360px,1.1fr);align-items:center;gap:42px;border:1px solid #2b3b4b;border-radius:26px;background:
 radial-gradient(circle at 82% 22%,rgba(71,156,255,.17),transparent 30%),
 radial-gradient(circle at 12% 90%,rgba(255,188,79,.08),transparent 28%),
 linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;overflow:hidden}
@@ -323,6 +323,11 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
 .business-slide-mark{position:relative;z-index:1;width:180px;height:180px;border-radius:36px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.09);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.015));box-shadow:inset 0 1px rgba(255,255,255,.07),0 30px 80px rgba(0,0,0,.28);font-size:58px;font-weight:950;letter-spacing:-.06em;color:#edf6ff}
 .business-slide[href]:hover .business-slide-mark{transform:scale(1.025)}
 .business-slide-mark{transition:transform .25s ease}
+.business-slide-preview{position:relative;z-index:1;width:100%;max-width:640px;justify-self:end;aspect-ratio:16/10;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#080d12;box-shadow:0 28px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.05)}
+.business-slide-preview:before{content:"LIVE WEBSITE";position:absolute;left:14px;top:14px;z-index:2;padding:6px 9px;border-radius:999px;background:rgba(6,12,18,.82);border:1px solid rgba(143,200,255,.3);color:#9ed0ff;font-size:8px;font-weight:900;letter-spacing:.14em;backdrop-filter:blur(8px)}
+.business-slide-preview img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .45s cubic-bezier(.22,.72,.2,1),filter .35s ease}
+.business-slide[href]:hover .business-slide-preview img{transform:scale(1.025);filter:brightness(1.04)}
+.business-slide[href]:hover .business-slide-preview{border-color:rgba(119,186,255,.35)}
 
 .business-slider-controls{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:18px}
 .business-slider-dots{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -337,15 +342,19 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
 @keyframes businessSliderProgress{from{width:0}to{width:100%}}
 
 @media(max-width:900px){
-  .business-slide{min-height:350px;padding:38px;grid-template-columns:1fr}
+  .business-slide{min-height:350px;padding:34px;grid-template-columns:1fr;gap:28px}
+  .business-slide-preview{justify-self:stretch;max-width:none;aspect-ratio:16/9}
   .business-slide-mark{position:absolute;right:26px;bottom:24px;width:110px;height:110px;border-radius:26px;font-size:36px;opacity:.46}
-  .business-slide-copy{padding-right:50px}
+  .business-slide-copy{padding-right:0}
 }
 @media(max-width:620px){
-  .business-slide{min-height:390px;padding:30px 26px}
-  .business-slide h3{font-size:45px}
-  .business-slide p{font-size:12px;max-width:92%}
+  .business-slide{min-height:390px;padding:24px 20px;gap:22px}
+  .business-slide h3{font-size:42px;margin-top:20px}
+  .business-slide p{font-size:12px;max-width:100%}
+  .business-slide b{margin-top:22px}
   .business-slide-copy{padding-right:0}
+  .business-slide-preview{aspect-ratio:16/10;border-radius:16px}
+  .business-slide-preview:before{left:10px;top:10px}
   .business-slide-mark{right:20px;bottom:20px;width:86px;height:86px;font-size:28px}
   .business-slider-controls{align-items:flex-end}
   .business-slider-dots{max-width:70%}
