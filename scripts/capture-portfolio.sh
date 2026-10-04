@@ -25,7 +25,8 @@ shot arda-moron 1440 900 https://ardamoron.nadmo.id/
 shot bbya 1440 900 https://bbya.nadmo.id/
 shot dwp 1440 900 https://dwp.nadmo.id/
 shot saixko 1440 900 https://saixko.nadmo.id/
+shot berlin-bintang 1440 900 https://berlinbintang.nadmo.id/
 
-for f in arda-moron bbya dwp saixko; do
+for f in arda-moron bbya dwp saixko berlin-bintang; do
   test -s "$OUT/$f.png"
 done
