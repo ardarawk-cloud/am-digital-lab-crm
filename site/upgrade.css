@@ -346,23 +346,15 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
   .personal-sample-grid{grid-template-columns:1fr}
 }
 
-/* NADMO selected work portfolio previews */
-.showcase-card .showcase-preview>.device-browser,.showcase-card .showcase-preview>.device-phone{display:none!important}
-.showcase-card .showcase-preview:before{display:none!important}
-.showcase-card .showcase-preview:after{content:"";position:relative;z-index:2;display:block;background-image:var(--project-shot);background-repeat:no-repeat;background-position:top center;background-size:cover;background-color:#071019;box-shadow:0 24px 60px rgba(0,0,0,.45)}
-.showcase-card[data-kind="apk"] .showcase-preview:after{width:150px;height:286px;border:5px solid #263747;border-radius:29px}
-.showcase-info:before{content:"REAL PROJECT PREVIEW";display:block;font-size:8px;letter-spacing:.14em;color:#5f7790;margin-bottom:12px;font-weight:850}
-.showcase-live:hover{color:#77baff}
-@media(max-width:760px){
-    .showcase-card[data-kind="apk"] .showcase-preview:after{width:82px;height:158px;border-width:3px;border-radius:18px}
-}
 
-/* Separate NADMO business portfolio — not advertising */
+/* NADMO business portfolio: same visual language as personal samples */
 .business-portfolio-section{background:linear-gradient(180deg,#0b1219,#0d151e);border-top:1px solid #1e2b38;border-bottom:1px solid #1e2b38}
-.business-portfolio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.business-work-sample .sample-shot{height:210px}
+.business-portfolio-head{margin-top:0}
+.business-portfolio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:980px}
+.business-work-sample .sample-shot{height:190px}
 .business-work-sample .sample-shot img{object-fit:cover;object-position:top center}
+.business-project-status{display:inline-flex;margin:12px 24px 24px;color:#71879b;font-size:9px;font-weight:900;letter-spacing:.08em}
 @media(max-width:820px){
   .business-portfolio-grid{grid-template-columns:1fr}
-  .business-work-sample .sample-shot{height:170px}
+  .business-work-sample .sample-shot{height:150px}
 }
