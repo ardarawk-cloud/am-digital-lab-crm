@@ -378,3 +378,12 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
 
 /* Business portfolio preview label — match Personal Branding card action styling */
 .business-portfolio-section .sample-preview-label{display:inline-flex;margin:12px 24px 24px;color:#7f90a3;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:none}
+
+/* Tighten transition: Digital Pricing -> Business Website Portfolio */
+#pricing{padding-bottom:46px}
+.business-portfolio-section{padding-top:46px}
+.business-portfolio-section .personal-samples-head{margin-top:0}
+@media(max-width:760px){
+  #pricing{padding-bottom:34px}
+  .business-portfolio-section{padding-top:34px}
+}
