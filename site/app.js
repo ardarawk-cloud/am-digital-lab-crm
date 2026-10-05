@@ -1,4 +1,4 @@
-for(const href of ['/upgrade.css','/showcase.css']){const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)}
+for(const href of ['/upgrade.css']){const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)}
 
 const logoHtml='<img src="/logo.svg" alt="NADMO STUDIO">';
 document.querySelectorAll('.brand-mark,.mini-logo').forEach(el=>{el.innerHTML=logoHtml});
