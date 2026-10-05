@@ -29,6 +29,7 @@ shot berlin-bintang 1440 900 https://berlinbintang.nadmo.id/
 shot dj-keyrin 1440 900 https://djkeyrin.nadmo.id/
 shot oka-raditya 1440 900 https://okaraditya.nadmo.id/
 shot anya-kaizy 1440 900 https://anyakaizy.nadmo.id/
+shot dekhan-good 1440 900 https://dekhangood.nadmo.id/
 
 # Featured business website previews.
 shot business-roamink 1440 900 https://roamink.nadmo.id/
@@ -38,6 +39,6 @@ shot business-amsound 1440 900 https://amsound.nadmo.id/
 shot business-balinightlifeconnect 1440 900 https://balinightlifeconnect.nadmo.id/
 shot business-originalbali 1440 900 https://originalbali.nadmo.id/
 
-for f in arda-moron bbya dwp saixko berlin-bintang dj-keyrin oka-raditya anya-kaizy business-roamink business-stayink business-bwd business-amsound business-balinightlifeconnect business-originalbali; do
+for f in arda-moron bbya dwp saixko berlin-bintang dj-keyrin oka-raditya anya-kaizy dekhan-good business-roamink business-stayink business-bwd business-amsound business-balinightlifeconnect business-originalbali; do
   test -s "$OUT/$f.png"
 done
