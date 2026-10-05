@@ -9,51 +9,6 @@ document.querySelectorAll('.price-card').forEach(card=>{const row=pricingValues.
 const budgetSelect=document.querySelector('select[name="budget_range"]');
 if(budgetSelect){const labels={'Under Rp5M':'Under Rp5.000.000','Rp5M–10M':'Rp5.000.000–Rp10.000.000','Rp10M–20M':'Rp10.000.000–Rp20.000.000','Rp20M–50M':'Rp20.000.000–Rp50.000.000','Rp50M+':'Rp50.000.000+'};[...budgetSelect.options].forEach(o=>{if(labels[o.textContent])o.textContent=labels[o.textContent]})}
 
-const projects=[
-{type:'web',label:'ENTERPRISE PLATFORM',status:'ACTIVE',name:'ACC OS X',desc:'Enterprise operating system for production workflows, channels, AI-assisted operations, publishing and connected workspaces.',stack:['Cloudflare','AI Workflow','Dashboard'],shot:'acc-os-x'},
-{type:'web',label:'BUSINESS SYSTEM',status:'LIVE',name:'NADMO STUDIO CRM',desc:'Cloud-native CRM covering leads, clients, projects, quotations, invoices, tasks, change requests and QC.',stack:['Workers','CRM','Operations'],shot:'amdl-crm'},
-{type:'web',label:'HOSPITALITY WEB',status:'DEMO',name:'ZUZU Family House',desc:'Hospitality website and booking-system concept with availability, booking flow, admin dashboard, rates and operational controls.',stack:['Booking','Admin','Hospitality'],shot:'zuzu-family-house'},
-{type:'apk',label:'MUSIC TECH',status:'ACTIVE',name:'AM STUDIO Music Distribution',desc:'Mobile product for structured music release and distribution operations.',stack:['Android','Workflow','Music'],shot:'am-studio-music'},
-{type:'apk',label:'AI APPLICATION',status:'STABLE TEST',name:'ORACLY',desc:'AI-focused application developed inside the NADMO/ACC product ecosystem with automated Android build and testing.',stack:['AI','Android','Automation'],shot:'oracly',url:'https://oracly.nadmo.id/'},
-{type:'apk',label:'AI TOOL',status:'STABLE',name:'AI Mashup',desc:'Experimental AI product combining multiple AI-assisted workflows into one mobile experience.',stack:['AI','Android','Experiment'],shot:'ai-mashup'},
-{type:'web',label:'CLIENT WEBSITE',status:'LIVE',name:'Brush by Yuda Christ',desc:'Premium makeup artist and hair stylist website in Bali with portfolio presentation, service discovery and direct booking flow.',stack:['Website','Portfolio','Booking'],shot:'brush-by-yuda',url:'https://brushbyyuda.nadmo.id/'}
-];
-
-const workSection=document.createElement('section');
-workSection.className='section portfolio-v2';
-workSection.id='work';
-workSection.innerHTML=`<div class="container">
-  <div class="section-head">
-    <div><span class="kicker">NADMO PORTFOLIO</span><h2>Selected work built by NADMO STUDIO.</h2></div>
-    <p>Real client work, internal products and validated prototypes. Status labels distinguish live products from demos and active builds.</p>
-  </div>
-  <div class="portfolio-filter">
-    <button class="active" data-filter="all">All Projects</button>
-    <button data-filter="web">Web / Systems</button>
-    <button data-filter="apk">Apps / Products</button>
-  </div>
-  <div class="showcase-grid">${projects.map(p=>`<article class="showcase-card" data-kind="${p.type}" style="--project-shot:url('/portfolio/${p.shot}.png?v=20261005-work')">
-    <div class="showcase-preview"></div>
-    <div class="showcase-info">
-      <div class="showcase-top"><span class="showcase-type">${p.label}</span><span class="showcase-status">${p.status}</span></div>
-      <h3>${p.name}</h3>
-      <p>${p.desc}</p>
-      <div class="showcase-stack">${p.stack.map(s=>`<span>${s}</span>`).join('')}</div>
-      ${p.url?`<a class="showcase-live" href="${p.url}" target="_blank" rel="noopener noreferrer">View Live Website ↗</a>`:''}
-    </div>
-  </article>`).join('')}</div>
-</div>`;
-const ecosystemSection=document.getElementById('ecosystem');
-ecosystemSection?.parentNode.insertBefore(workSection,ecosystemSection);
-
-document.querySelectorAll('.portfolio-filter button').forEach(btn=>btn.addEventListener('click',()=>{
-  document.querySelectorAll('.portfolio-filter button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const f=btn.dataset.filter;
-  document.querySelectorAll('.showcase-card').forEach(card=>{card.hidden=f!=='all'&&card.dataset.kind!==f});
-  track('portfolio_filter',f);
-}));
-
 const projectTypeSelect=document.querySelector('select[name="project_type"]');
 document.querySelectorAll('[data-project-type]').forEach(link=>link.addEventListener('click',()=>{
   const value=link.dataset.projectType||'';
