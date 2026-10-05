@@ -399,3 +399,6 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
 @media(max-width:760px){
   .app-project-mark{height:96px}
 }
+
+.app-project-logo{padding:14px}
+.app-project-logo img{display:block;width:100%;height:100%;object-fit:contain;border-radius:18px}
