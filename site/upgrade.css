@@ -375,11 +375,3 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
 @media(max-width:820px){
   .personal-sample-grid{grid-template-columns:1fr}
 }
-
-/* Business samples: exactly the same compact card rhythm as Personal Branding */
-.business-samples-head{margin-top:58px}
-.business-sample-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.business-project-status{display:inline-flex;margin:12px 24px 24px;color:#71879b;font-size:9px;font-weight:900;letter-spacing:.08em}
-@media(max-width:820px){
-  .business-sample-grid{grid-template-columns:1fr}
-}
