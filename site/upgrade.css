@@ -387,3 +387,15 @@ linear-gradient(135deg,#111a24,#0a1017 70%);color:#f4f8fb;text-decoration:none;o
   #pricing{padding-bottom:34px}
   .business-portfolio-section{padding-top:34px}
 }
+
+/* APK portfolio */
+.app-portfolio-head{margin-top:48px}
+.app-project-card{padding:0;overflow:hidden}
+.app-project-mark{height:120px;display:grid;place-items:center;border-bottom:1px solid #293847;background:radial-gradient(circle at 50% 15%,rgba(77,163,255,.16),transparent 48%),linear-gradient(145deg,#101923,#0a1118);font-size:30px;font-weight:950;letter-spacing:.08em;color:#a8d5ff}
+.app-project-card>.sample-tag,.app-project-card>h3,.app-project-card>p{margin-left:24px;margin-right:24px}
+.app-project-card>.sample-tag{display:block;margin-top:20px}
+.app-project-card>h3{margin-top:18px}
+.app-project-card>.sample-preview-label{margin-left:24px;margin-right:24px}
+@media(max-width:760px){
+  .app-project-mark{height:96px}
+}
