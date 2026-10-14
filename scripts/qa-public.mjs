@@ -40,7 +40,7 @@ try {
       // Business nav must lead to the actual pricing section, not a generic services section.
       await open(page);
       assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),'https://nadmo.id/');
-      assert.equal(await page.locator('.floating-contact').getAttribute('href')?.startsWith('https://wa.me/'),true);
+      assert.equal((await page.locator('.floating-contact').getAttribute('href'))?.startsWith('https://wa.me/'),true);
       assert.equal(await page.locator('#business-portfolio .personal-sample').count()>=2,true);
       const body = await page.locator('body').innerText();
       assert.ok(!/KAI\s+(?:TRADE|KASINO)/i.test(body),'Retired products must not appear publicly');
